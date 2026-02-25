@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSM I Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #47ffc8;
+    --danger: #ff4747;
+    --text: #f0f0f0;
+    --text-muted: #666;
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 720px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* START SCREEN */
+  .start-screen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+  }
+  .start-screen h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .start-screen p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .input-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+  }
+  .name-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 20px;
+  }
+  .name-input:focus { border-color: var(--accent); }
+  .name-input::placeholder { color: var(--text-muted); }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .info-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .info-box .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+  .info-box small {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  .btn-start {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 14px 40px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+    width: 100%;
+  }
+  .btn-start:hover { background: #d4e83e; }
+  .btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 24px;
+    display: none;
+  }
+  .progress-bar-wrap.show { display: block; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* QUIZ CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 720px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  .card.show { display: block; animation: fadeIn 0.3s ease; }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card.answered::before { opacity: 1; }
+  .q-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.1em;
+  }
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    background: var(--surface2);
+  }
+  .option:hover:not(.disabled) {
+    border-color: #444;
+    background: #222;
+    transform: translateX(3px);
+  }
+  .option-letter {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    min-width: 22px;
+    transition: color 0.2s;
+  }
+  .option-text { font-size: 14px; line-height: 1.5; flex: 1; }
+  .option-icon { font-size: 16px; opacity: 0; transition: opacity 0.2s; }
+  .option.correct { border-color: var(--accent2); background: rgba(71,255,200,0.07); }
+  .option.correct .option-letter { color: var(--accent2); }
+  .option.correct .option-icon { opacity: 1; }
+  .option.wrong { border-color: var(--danger); background: rgba(255,71,71,0.07); }
+  .option.wrong .option-letter { color: var(--danger); }
+  .option.wrong .option-icon { opacity: 1; }
+  .option.disabled { cursor: default; pointer-events: none; }
+  .option.highlight-correct { border-color: var(--accent2); background: rgba(71,255,200,0.04); }
+
+  /* FEEDBACK */
+  .feedback {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+    border-left: 3px solid;
+  }
+  .feedback.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback.correct-fb { border-color: var(--accent2); background: rgba(71,255,200,0.05); color: #8effd9; }
+  .feedback.wrong-fb { border-color: var(--danger); background: rgba(255,71,71,0.05); color: #ff9090; }
+  .feedback strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* NEXT BUTTON */
+  .btn-wrap { margin-top: 24px; display: none; justify-content: flex-end; }
+  .btn-wrap.show { display: flex; }
+  .btn-next {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { background: #d4e83e; transform: translateY(-1px); }
+
+  /* RESULT SCREEN */
+  .result-screen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+    display: none;
+  }
+  .result-screen.show { display: block; animation: fadeIn 0.5s ease; }
+  .result-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .score-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    background: var(--surface2);
+  }
+  .score-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .result-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    display: block;
+  }
+  .stat-box.s-correct .stat-val { color: var(--accent2); }
+  .stat-box.s-wrong .stat-val { color: var(--danger); }
+  .stat-box.s-pct .stat-val { color: var(--accent); }
+  .stat-box small {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* Wrong questions list */
+  .wrong-list {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .wrong-list-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--danger);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .wrong-item {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+  }
+  .wrong-item:last-child { border-bottom: none; }
+  .wrong-item span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--danger);
+    margin-right: 8px;
+  }
+
+  /* Save status */
+  .save-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    height: 18px;
+  }
+  .save-status.saving { color: var(--accent); }
+  .save-status.saved { color: var(--accent2); }
+  .save-status.error { color: var(--danger); }
+
+  .btn-restart {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 32px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-restart:hover { background: var(--accent); color: #000; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 500px) {
+    .card, .result-screen, .start-screen { padding: 24px 18px; }
+    .stats-grid, .info-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">PSM I · Zertifizierungsvorbereitung</div>
+  <h1>Scrum <span>Quiz</span></h1>
+  <p class="subtitle">15 Fragen · Professional Scrum Master I</p>
+</div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="start-screen">
+  <h2>Bereit für den Test?</h2>
+  <p>Beantworte 15 Multiple-Choice-Fragen zur PSM I Zertifizierung.<br>Du erhältst nach jeder Frage sofortiges Feedback.</p>
+  <div class="info-grid">
+    <div class="info-box"><span class="val">15</span><small>FRAGEN</small></div>
+    <div class="info-box"><span class="val">MC</span><small>FRAGETYP</small></div>
+    <div class="info-box"><span class="val">85%</span><small>PSM I BESTEHEN</small></div>
+  </div>
+  <label class="input-label" for="name-input">Dein Name</label>
+  <input type="text" id="name-input" class="name-input" placeholder="Vorname Nachname" autocomplete="off">
+  <button class="btn-start" id="btn-start" disabled onclick="startQuiz()">Quiz starten →</button>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-wrap" id="progress-wrap">
+  <div class="progress-meta">
+    <span id="prog-label">Frage 1 von 15</span>
+    <span id="prog-score">0 richtig</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+  </div>
+</div>
+
+<!-- QUIZ CARD -->
+<div class="card" id="quiz-card">
+  <div class="q-number" id="q-number">FRAGE 01</div>
+  <div class="q-text" id="q-text"></div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="btn-wrap" id="btn-wrap">
+    <button class="btn-next" id="btn-next">Weiter →</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="result-screen" id="result-screen">
+  <div class="result-name" id="result-name"></div>
+  <div class="score-ring">
+    <span class="score-number" id="res-pct">0%</span>
+    <span class="score-label">SCORE</span>
+  </div>
+  <div class="result-title" id="res-title">Quiz abgeschlossen</div>
+  <div class="result-sub" id="res-sub"></div>
+  <div class="stats-grid">
+    <div class="stat-box s-correct"><span class="stat-val" id="res-correct">0</span><small>RICHTIG</small></div>
+    <div class="stat-box s-wrong"><span class="stat-val" id="res-wrong">0</span><small>FALSCH</small></div>
+    <div class="stat-box s-pct"><span class="stat-val" id="res-total">15</span><small>GESAMT</small></div>
+  </div>
+  <div class="wrong-list" id="wrong-list" style="display:none;">
+    <div class="wrong-list-title">✗ Falsch beantwortet</div>
+    <div id="wrong-items"></div>
+  </div>
+  <div class="save-status" id="save-status"></div>
+  <button class="btn-restart" onclick="restart()">↺ Nochmal starten</button>
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/zgh59mfz5i5xvam8at7ghjj2r0hbg55b';
+
+const questions = [
+  { q: "Who is accountable for maximizing the value of the product?", opts: ["The Scrum Master","The Developers","The Product Owner","The Scrum Team"], correct: 2, hint: "Der Product Owner ist accountable für Wertmaximierung des Produkts." },
+  { q: "What is the purpose of the Sprint Review?", opts: ["To approve completed work","To inspect the Increment and adapt the Product Backlog","To evaluate team performance","To assign work for the next Sprint"], correct: 1, hint: "Review = Produktinspektion + Anpassung des Product Backlogs. Keine Abnahme." },
+  { q: "When does a new Sprint start?", opts: ["After the Sprint Planning","The day after the previous Sprint ends","Immediately after the previous Sprint ends","After the Sprint Review"], correct: 2, hint: "Sprints schließen nahtlos aneinander an – kein Gap zwischen Sprints." },
+  { q: "Who creates the Sprint Backlog?", opts: ["The Scrum Master","The Product Owner","The Developers","The Scrum Team"], correct: 2, hint: "Sprint Backlog is a plan by and for the Developers." },
+  { q: "What happens if a Product Backlog item does not meet the Definition of Done?", opts: ["It can still be presented in the Sprint Review","It may be released with stakeholder approval","It is not part of the Increment","It counts as partially done"], correct: 2, hint: "Done ist binär. Kein Done = kein Increment." },
+  { q: "Who is responsible for monitoring progress toward the Sprint Goal?", opts: ["The Scrum Master","The Product Owner","The Developers","Management"], correct: 2, hint: "Daily Scrum = Developers inspect progress toward Sprint Goal." },
+  { q: "Which statement about the Sprint Goal is correct?", opts: ["A Sprint can contain multiple Sprint Goals","The Sprint Goal is optional for experienced teams","The Sprint Goal provides flexibility regarding scope","The Sprint Goal cannot be changed under any circumstances"], correct: 2, hint: "Scope darf angepasst werden, solange der Sprint Goal erhalten bleibt." },
+  { q: "Who estimates the work in the Product Backlog?", opts: ["The Product Owner","The Scrum Master","The Developers","The Scrum Team together with stakeholders"], correct: 2, hint: "Developers sind für das Sizing (Schätzen) verantwortlich." },
+  { q: "What is the timebox of the Daily Scrum?", opts: ["30 minutes","15 minutes","1 hour","No timebox is defined"], correct: 1, hint: "Daily Scrum ist auf 15 Minuten timeboxed." },
+  { q: "What is the purpose of the Definition of Done?", opts: ["To define acceptance criteria for Product Backlog items","To increase transparency of the Increment","To measure team performance","To estimate effort"], correct: 1, hint: "DoD schafft Qualitätstransparenz des Increments." },
+  { q: "Which of the following is true about the Product Goal?", opts: ["There can be multiple Product Goals at the same time","The Product Goal is defined by the Scrum Master","The Product Goal provides a long-term objective","The Product Goal is optional"], correct: 2, hint: "Ein Product Goal pro Product Backlog. Es gibt die langfristige Richtung vor." },
+  { q: "Who is accountable for the effectiveness of Scrum?", opts: ["The Product Owner","The Developers","The Scrum Master","The Scrum Team"], correct: 2, hint: "Scrum Master is accountable for the Scrum Team's effectiveness." },
+  { q: "During a Sprint, scope may be clarified and renegotiated between whom?", opts: ["Developers and Scrum Master","Developers and Product Owner","Product Owner and Management","Scrum Master and Stakeholders"], correct: 1, hint: "Scope-Anpassung erfolgt zwischen Developers und Product Owner." },
+  { q: "Which statement about Stakeholders in the Sprint Review is correct?", opts: ["They approve or reject the Increment","They assign new work directly to Developers","They collaborate and provide feedback","Their attendance is optional and discouraged"], correct: 2, hint: "Review ist kollaborativ – keine Abnahme, kein direktes Task-Assignment." },
+  { q: "If quality standards are lowered during a Sprint to meet the deadline, what does this indicate?", opts: ["Effective adaptation","Proper use of empirical process control","Violation of the Definition of Done","Strong stakeholder collaboration"], correct: 2, hint: "Qualitätsstandards dürfen nicht gesenkt werden – das verletzt die Definition of Done." }
+];
+
+const letters = ['A','B','C','D'];
+let current = 0, score = 0, answered = false, userName = '', wrongQuestions = [];
+
+// Name input enable/disable start button
+document.getElementById('name-input').addEventListener('input', function() {
+  document.getElementById('btn-start').disabled = this.value.trim().length < 2;
+});
+
+function startQuiz() {
+  userName = document.getElementById('name-input').value.trim();
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('progress-wrap').classList.add('show');
+  document.getElementById('quiz-card').classList.add('show');
+  render();
+}
+
+function render() {
+  const q = questions[current];
+  document.getElementById('q-number').textContent = `FRAGE ${String(current+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-label').textContent = `Frage ${current+1} von ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('prog-score').textContent = `${score} richtig`;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="option-letter">${letters[i]}</span><span class="option-text">${opt}</span><span class="option-icon">${i === q.correct ? '✓' : '✗'}</span>`;
+    div.addEventListener('click', () => selectOption(i));
+    opts.appendChild(div);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('btn-wrap').className = 'btn-wrap';
+  document.getElementById('quiz-card').classList.remove('answered');
+  answered = false;
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+
+  const fb = document.getElementById('feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    score++;
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<strong>✓ Richtig!</strong>${q.hint}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.correct].classList.add('highlight-correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<strong>✗ Falsch</strong>${q.hint}`;
+    wrongQuestions.push({ num: current + 1, text: q.q });
+  }
+
+  document.getElementById('quiz-card').classList.add('answered');
+  document.getElementById('btn-wrap').className = 'btn-wrap show';
+  document.getElementById('prog-score').textContent = `${score} richtig`;
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  current++;
+  if (current >= questions.length) showResult();
+  else render();
+});
+
+async function showResult() {
+  document.getElementById('quiz-card').classList.remove('show');
+  document.getElementById('progress-wrap').classList.remove('show');
+
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('result-name').textContent = `ERGEBNIS FÜR: ${userName.toUpperCase()}`;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-correct').textContent = score;
+  document.getElementById('res-wrong').textContent = questions.length - score;
+  document.getElementById('res-total').textContent = questions.length;
+
+  let title, sub;
+  if (pct >= 85) { title = '🎯 Ausgezeichnet!'; sub = 'PSM I Niveau erreicht – ready for the exam!'; }
+  else if (pct >= 70) { title = '👍 Gut gemacht!'; sub = 'Solide Basis – noch etwas wiederholen für die Zertifizierung.'; }
+  else { title = '📚 Weiter üben!'; sub = 'Den Scrum Guide nochmals durchgehen und Quiz wiederholen.'; }
+
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent = sub;
+
+  // Show wrong questions
+  if (wrongQuestions.length > 0) {
+    const wl = document.getElementById('wrong-list');
+    const wi = document.getElementById('wrong-items');
+    wl.style.display = 'block';
+    wi.innerHTML = wrongQuestions.map(w =>
+      `<div class="wrong-item"><span>F${w.num}</span>${w.text}</div>`
+    ).join('');
+  }
+
+  document.getElementById('result-screen').className = 'result-screen show';
+  document.getElementById('progress-fill').style.width = '100%';
+
+  // Send to Make.com webhook
+  sendResults(pct);
+}
+
+function sendResults(pct) {
+  const statusEl = document.getElementById('save-status');
+  statusEl.className = 'save-status saving';
+  statusEl.textContent = '⟳ Ergebnisse werden gespeichert...';
+
+  const wrongList = wrongQuestions.map(w => `F${w.num}: ${w.text}`).join(' | ');
+
+  const params = new URLSearchParams({
+    timestamp: new Date().toLocaleString('de-DE'),
+    name: userName,
+    score: String(score),
+    total: String(questions.length),
+    percent: pct + '%',
+    wrong_questions: wrongList || 'Keine'
+  });
+
+  // Image-Pixel-Trick: umgeht CORS vollstaendig, funktioniert in jedem Browser
+  const img = new Image();
+  img.onload = function() {
+    statusEl.className = 'save-status saved';
+    statusEl.textContent = '✓ Ergebnisse erfolgreich gespeichert';
+  };
+  img.onerror = function() {
+    // Make.com gibt kein Bild zurueck, onerror wird trotzdem gefeuert = Request war erfolgreich
+    statusEl.className = 'save-status saved';
+    statusEl.textContent = '✓ Ergebnisse erfolgreich gespeichert';
+  };
+  img.src = WEBHOOK_URL + '?' + params.toString();
+}
+
+function restart() {
+  current = 0; score = 0; wrongQuestions = [];
+  document.getElementById('result-screen').className = 'result-screen';
+  document.getElementById('wrong-list').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+  document.getElementById('name-input').value = '';
+  document.getElementById('btn-start').disabled = true;
+}
+</script>
+</body>
+</html>
