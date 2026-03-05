@@ -410,6 +410,65 @@
     }
     .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(124,58,237,0.5); }
 
+    /* REGISTRATION FORM */
+    .reg-form {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      margin: 32px auto 0;
+      text-align: left;
+    }
+    .reg-form h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .reg-form p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+    .form-group input {
+      width: 100%;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--primary-light); }
+    .form-group input::placeholder { color: var(--text-muted); }
+    .btn-register {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color: var(--error); font-size: 12px; margin-top: 8px; display: none; }
+
+    /* SENDING STATE */
+    .sending-overlay {
+      text-align: center;
+      padding: 40px 20px;
+      display: none;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @media (max-width: 600px) {
       .question-card { padding: 20px; }
       .option { padding: 12px 13px; font-size: 13px; }
@@ -468,8 +527,21 @@
         <p>Product Backlog, Sprint Backlog, Increment und die drei Commitments</p>
       </div>
     </div>
-    <button class="btn-start" onclick="startQuiz()">Quiz starten ▶</button>
-    <p style="margin-top:16px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhaltet ihr eine Erklärung mit Scrum Guide Referenz</p>
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Damit dein Ergebnis gespeichert wird und du eine persönliche Auswertung per E-Mail erhältst.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:16px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort gibt es eine Erklärung mit Scrum Guide Referenz</p>
   </div>
 
   <!-- QUIZ -->
@@ -771,11 +843,16 @@ const questions = [
   }
 ];
 
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
 let currentQuestion = 0;
 let score = 0;
 let selectedOption = null;
 let answered = false;
 let shuffledQuestions = [];
+let wrongAnswers = []; // tracks wrong questions for webhook
+let userName = '';
+let userEmail = '';
 
 function shuffle(array) {
   const arr = [...array];
@@ -786,8 +863,25 @@ function shuffle(array) {
   return arr;
 }
 
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+
+  if (!name || !emailRegex.test(email)) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
 function startQuiz() {
   shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
   document.getElementById('intro-screen').style.display = 'none';
   document.getElementById('quiz-screen').style.display = 'block';
   document.getElementById('progress-bar-container').style.display = 'block';
@@ -865,6 +959,16 @@ function checkAnswer(correctIdx) {
 
   if (isCorrect) score++;
 
+  // Track wrong answers for webhook
+  if (!isCorrect) {
+    wrongAnswers.push({
+      frage: q.text.substring(0, 80) + (q.text.length > 80 ? '...' : ''),
+      kategorie: q.category,
+      erklaerung: q.explanation,
+      richtigeAntwort: q.options[q.correct]
+    });
+  }
+
   // Style all options
   document.querySelectorAll('.option').forEach((opt, i) => {
     opt.classList.add('disabled');
@@ -919,6 +1023,34 @@ function showResult() {
   const percent = Math.round((score / total) * 100);
   const wrong = total - score;
 
+  // Build wrong_details string for Make/Email
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '🎉 Alle Fragen richtig beantwortet!';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) =>
+      `${i+1}. [${w.kategorie}]\nFrage: ${w.frage}\n✅ Richtig: ${w.richtigeAntwort}\n💡 ${w.erklaerung}\n`
+    ).join('\n---\n');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+
+  // Timestamp
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  // Send to Make webhook
+  sendToWebhook({
+    name: userName,
+    email: userEmail,
+    score: score,
+    total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails
+  });
+
   let emoji, title, sub, color;
   if (percent >= 85) {
     emoji = '🏆'; title = 'Ausgezeichnet!'; sub = 'Ihr seid gut vorbereitet für die PSM-I-Prüfung.'; color = '#10B981';
@@ -940,6 +1072,7 @@ function showResult() {
     </div>
     <h2 class="result-title">${title}</h2>
     <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Eine detaillierte Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
     <div class="result-breakdown">
       <div class="breakdown-card">
         <div class="breakdown-num green">${score}</div>
@@ -960,6 +1093,18 @@ function showResult() {
     </div>
   `;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook konnte nicht erreicht werden:', e);
+  }
 }
 
 function restartQuiz() {
