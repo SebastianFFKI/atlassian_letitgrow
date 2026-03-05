@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCR1 – Wochenquiz 1 | Scrum Grundlagen bis Sprint Retrospective</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .header p {
+      font-size: 15px;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header-meta {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .meta-chip {
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* PROGRESS */
+    .progress-container {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .score-display {
+      font-weight: 700;
+      color: var(--primary-light);
+    }
+
+    /* MAIN */
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    /* QUESTION CARD */
+    .question-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      transition: border-color 0.3s;
+      display: none;
+    }
+    .question-card.active { display: block; animation: fadeIn 0.3s ease; }
+    .question-card.answered-correct { border-color: var(--success); }
+    .question-card.answered-wrong { border-color: var(--error); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .q-number {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .q-meta {
+      flex: 1;
+    }
+    .q-category {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--primary-light);
+      margin-bottom: 6px;
+    }
+    .q-text {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .q-difficulty {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* OPTIONS */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .option {
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--primary-light);
+      background: rgba(124, 58, 237, 0.12);
+      transform: translateX(3px);
+    }
+    .option-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .option.selected { border-color: var(--primary); background: rgba(124,58,237,0.2); }
+    .option.selected .option-letter { background: var(--primary); }
+    .option.correct { border-color: var(--success); background: rgba(16,185,129,0.12); }
+    .option.correct .option-letter { background: var(--success); color: #fff; }
+    .option.wrong { border-color: var(--error); background: rgba(239,68,68,0.12); }
+    .option.wrong .option-letter { background: var(--error); color: #fff; }
+    .option.show-correct { border-color: var(--success); background: rgba(16,185,129,0.08); }
+    .option.show-correct .option-letter { background: var(--success); color: #fff; }
+    .option.disabled { cursor: not-allowed; }
+
+    /* FEEDBACK */
+    .feedback {
+      display: none;
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .feedback.show { display: block; animation: fadeIn 0.3s ease; }
+    .feedback.correct-fb {
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+    .feedback.wrong-fb {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+    }
+    .feedback-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .feedback-title.correct-title { color: var(--success); }
+    .feedback-title.wrong-title { color: var(--error); }
+    .scrum-guide-ref {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .scrum-guide-ref strong { color: var(--primary-light); }
+
+    /* ACTIONS */
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-check {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+    .btn-check:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(124,58,237,0.4); }
+    .btn-check:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-next {
+      background: linear-gradient(135deg, var(--accent), #C026D3);
+      color: white;
+      display: none;
+    }
+    .btn-next.show { display: block; }
+    .btn-next:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(236,72,153,0.4); }
+
+    /* RESULT SCREEN */
+    #result-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      animation: fadeIn 0.5s ease;
+    }
+    .result-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 40px rgba(124,58,237,0.5);
+    }
+    .result-percent {
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .result-label { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+    .result-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .result-sub { color: var(--text-muted); margin-bottom: 32px; font-size: 15px; }
+
+    .result-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      max-width: 500px;
+      margin: 0 auto 32px;
+    }
+    .breakdown-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 12px;
+    }
+    .breakdown-num { font-size: 28px; font-weight: 800; }
+    .breakdown-num.green { color: var(--success); }
+    .breakdown-num.red { color: var(--error); }
+    .breakdown-num.blue { color: var(--primary-light); }
+    .breakdown-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .btn-restart {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 14px 36px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+
+    .psm-hint {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--warning);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 24px;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .psm-hint strong { color: var(--warning); }
+
+    /* INTRO */
+    #intro-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 640px;
+      margin: 32px auto;
+    }
+    .intro-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .intro-icon { font-size: 28px; margin-bottom: 8px; }
+    .intro-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .intro-card p { font-size: 12px; color: var(--text-muted); }
+    .btn-start {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 16px 48px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(124,58,237,0.5); }
+
+    /* REGISTRATION FORM */
+    .reg-form {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      margin: 32px auto 0;
+      text-align: left;
+    }
+    .reg-form h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .reg-form p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+    .form-group input {
+      width: 100%;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--primary-light); }
+    .form-group input::placeholder { color: var(--text-muted); }
+    .btn-register {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color: var(--error); font-size: 12px; margin-top: 8px; display: none; }
+
+    /* SENDING STATE */
+    .sending-overlay {
+      text-align: center;
+      padding: 40px 20px;
+      display: none;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 20px; }
+      .option { padding: 12px 13px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">📋 SCR1 · Wochenquiz</div>
+  <h1>Scrum Grundlagen – Woche 1</h1>
+  <p>Von Agile & Scrum-Grundlagen bis zur Sprint Retrospective (SCR1.1 – SCR1.15)</p>
+  <div class="header-meta">
+    <div class="meta-chip">🎯 PSM I Vorbereitung</div>
+    <div class="meta-chip">📊 Mittelschwer</div>
+    <div class="meta-chip">⏱ ca. 15 Minuten</div>
+    <div class="meta-chip">❓ 20 Fragen</div>
+  </div>
+</div>
+
+<div class="progress-container" id="progress-bar-container" style="display:none;">
+  <div class="progress-top">
+    <span id="progress-label">Frage 1 von 20</span>
+    <span class="score-display" id="live-score">Punkte: 0</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <h2 style="font-size:22px; margin-bottom:10px;">🚀 Bereit für das Wochenquiz?</h2>
+    <p style="color:var(--text-muted); max-width:520px; margin:0 auto;">Testet euer Verständnis der ersten Kurswoche. Alle Fragen basieren ausschließlich auf dem <strong style="color:var(--primary-light)">Scrum Guide 2020</strong>.</p>
+    <div class="intro-grid">
+      <div class="intro-card">
+        <div class="intro-icon">🏗️</div>
+        <h3>Scrum Framework</h3>
+        <p>Empirie, Werte, Team-Struktur und das Framework als Ganzes</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-icon">👥</div>
+        <h3>Rollen & Accountabilities</h3>
+        <p>Product Owner, Scrum Master, Developers und ihre Verantwortlichkeiten</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-icon">📅</div>
+        <h3>Scrum Events</h3>
+        <p>Sprint, Sprint Planning, Daily Scrum, Sprint Review & Retrospective</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-icon">📦</div>
+        <h3>Artefakte & Commitments</h3>
+        <p>Product Backlog, Sprint Backlog, Increment und die drei Commitments</p>
+      </div>
+    </div>
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Damit dein Ergebnis gespeichert wird und du eine persönliche Auswertung per E-Mail erhältst.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:16px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort gibt es eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const questions = [
+  // === BLOCK 1: AGILE & SCRUM GRUNDLAGEN ===
+  {
+    category: "Agile Grundlagen",
+    difficulty: "Mittel",
+    text: "Was unterscheidet Scrum grundlegend von einem klassischen Wasserfallprojekt?",
+    options: [
+      "Scrum verwendet detaillierte Upfront-Planung für das gesamte Projekt",
+      "Scrum ist ein empirischer Ansatz, der auf Transparenz, Überprüfung und Anpassung basiert",
+      "Scrum ersetzt alle anderen Projektmanagement-Methoden vollständig",
+      "Scrum funktioniert nur in der Softwareentwicklung"
+    ],
+    correct: 1,
+    explanation: "Scrum basiert auf Empirie (empirische Prozesskontrolle). Die drei Säulen sind Transparenz, Überprüfung (Inspection) und Anpassung (Adaptation). Im Gegensatz zum Wasserfall wird nicht alles vorab geplant, sondern iterativ entwickelt und kontinuierlich angepasst.",
+    scrumRef: "Scrum Guide 2020: 'Scrum is founded on empiricism and lean thinking. Empiricism asserts that knowledge comes from experience...'"
+  },
+  {
+    category: "Scrum Framework",
+    difficulty: "Mittel",
+    text: "Scrum wird im Scrum Guide als Framework beschrieben. Was bedeutet das konkret?",
+    options: [
+      "Scrum ist eine vollständige Methode mit genauen Schritt-für-Schritt-Anweisungen",
+      "Scrum ist ein leichtgewichtiges Framework, das einen Rahmen vorgibt, aber Teams Freiheit lässt, wie sie die Arbeit erledigen",
+      "Scrum ist ein starres Regelwerk, das nicht angepasst werden darf",
+      "Scrum ist ein Prozessmodell, das speziell für große Organisationen entwickelt wurde"
+    ],
+    correct: 1,
+    explanation: "Scrum ist bewusst als Framework (Rahmenwerk) und nicht als Prozess oder Methode definiert. Es gibt einen klaren Rahmen vor (Rollen, Events, Artefakte), lässt aber Raum für den Einsatz verschiedener Techniken und Praktiken. Das Team entscheidet, WIE es die Arbeit im Rahmen von Scrum erledigt.",
+    scrumRef: "Scrum Guide 2020: 'Scrum is a lightweight framework that helps people, teams and organizations generate value through adaptive solutions for complex problems.'"
+  },
+  {
+    category: "Scrum Team",
+    difficulty: "Mittel",
+    text: "Wie viele Personen umfasst das Scrum Team laut Scrum Guide typischerweise?",
+    options: [
+      "Genau 7 Personen (plus/minus 2)",
+      "Mindestens 5, höchstens 12 Personen",
+      "In der Regel 10 oder weniger Personen",
+      "Keine Vorgabe – die Teamgröße ist frei wählbar"
+    ],
+    correct: 2,
+    explanation: "Der Scrum Guide empfiehlt 10 oder weniger Personen für das gesamte Scrum Team (also Product Owner + Scrum Master + Developers zusammen). Kleinere Teams kommunizieren besser und sind produktiver. Wenn das Team zu groß wird, sollte es in mehrere kleinere Scrum Teams aufgeteilt werden.",
+    scrumRef: "Scrum Guide 2020: 'The Scrum Team is small enough to remain nimble and large enough to complete significant work within a Sprint, typically 10 or fewer people.'"
+  },
+  // === BLOCK 2: ROLLEN ===
+  {
+    category: "Rollen: Product Owner",
+    difficulty: "Mittel",
+    text: "Wofür ist der Product Owner laut Scrum Guide primär verantwortlich?",
+    options: [
+      "Für die technische Qualität des Produkts",
+      "Für die Maximierung des Wertes des Produkts, das aus der Arbeit des Scrum Teams resultiert",
+      "Für die Einhaltung von Scrum-Prozessen im Team",
+      "Für das tägliche Management und die Koordination der Developer"
+    ],
+    correct: 1,
+    explanation: "Der Product Owner ist accountable (ergebnisverantwortlich) für die Maximierung des Produktwertes. Dies umfasst das effektive Management des Product Backlogs. Wichtig: Der Product Owner ist eine Person, kein Komitee. Er verwaltet das Product Backlog und kann Aufgaben delegieren, bleibt aber stets verantwortlich.",
+    scrumRef: "Scrum Guide 2020: 'The Product Owner is accountable for maximizing the value of the product resulting from the work of the Scrum Team.'"
+  },
+  {
+    category: "Rollen: Scrum Master",
+    difficulty: "Mittel",
+    text: "Ein Scrum Master stellt fest, dass das Daily Scrum regelmäßig 45 Minuten dauert. Was ist die korrekte Reaktion?",
+    options: [
+      "Der Scrum Master bricht das Meeting nach 15 Minuten ab, da die Timebox abgelaufen ist",
+      "Der Scrum Master hilft dem Team zu verstehen, warum das Daily Scrum auf 15 Minuten begrenzt ist, und coacht sie dabei, dies einzuhalten",
+      "Der Scrum Master verlängert die offizielle Timebox auf 45 Minuten, da das Team mehr Zeit braucht",
+      "Der Scrum Master greift nicht ein, da das Team selbstorganisiert ist"
+    ],
+    correct: 1,
+    explanation: "Der Scrum Master ist verantwortlich dafür, dass alle Scrum Events stattfinden und innerhalb der Timebox bleiben. Er tut dies durch Coaching und Erklärung – nicht durch autoritäre Eingriffe. Er hilft dem Team, den Wert der Timebox zu verstehen. Die Timebox des Daily Scrum beträgt 15 Minuten und ist nicht verhandelbar.",
+    scrumRef: "Scrum Guide 2020: 'The Scrum Master serves the Scrum Team in several ways, including ensuring that all Scrum events take place and are positive, productive, and kept within the timebox.'"
+  },
+  {
+    category: "Rollen: Developers",
+    difficulty: "Mittel",
+    text: "Welche der folgenden Aussagen über die Developers im Scrum Team ist korrekt?",
+    options: [
+      "Developers sind ausschließlich Softwareentwickler",
+      "Developers erstellen das Sprint Backlog und sind accountable für die Einhaltung der Definition of Done",
+      "Developers entscheiden, welche Product-Backlog-Einträge priorisiert werden",
+      "Developers berichten täglich an den Scrum Master über ihren Fortschritt"
+    ],
+    correct: 1,
+    explanation: "Developers sind die Menschen im Scrum Team, die sich verpflichten, jeden Sprint ein nutzbares Increment zu erstellen. Sie sind accountable für: das Erstellen des Sprint Backlogs, die Einhaltung der Definition of Done, die tägliche Anpassung des Plans zum Sprint-Ziel hin und das gegenseitige zur Rechenschaft ziehen. Der Begriff 'Developers' bezieht sich auf alle, die am Increment arbeiten – unabhängig vom Berufsfeld.",
+    scrumRef: "Scrum Guide 2020: 'Developers are always accountable for: Creating a plan for the Sprint, the Sprint Backlog; Instilling quality by adhering to a Definition of Done...'"
+  },
+  {
+    category: "Rollen: Scrum Team",
+    difficulty: "Mittel",
+    text: "Wer entscheidet im Scrum Team, WIE die Arbeit erledigt wird?",
+    options: [
+      "Der Scrum Master als Prozessverantwortlicher",
+      "Der Product Owner, da er die Anforderungen stellt",
+      "Das Management der Organisation",
+      "Die Developers – das Team ist selbstmanagend"
+    ],
+    correct: 3,
+    explanation: "Das Scrum Team ist selbstmanagend ('self-managing'), was bedeutet: Es entscheidet intern, wer was, wann und wie macht. Niemand von außen (kein Manager, kein Scrum Master, kein Product Owner) sagt den Developers, wie sie Product-Backlog-Einträge in Increments umwandeln sollen. Dies ist ein Kernprinzip von Scrum.",
+    scrumRef: "Scrum Guide 2020: 'They are also self-managing, meaning they internally decide who does what, when, and how.'"
+  },
+  // === BLOCK 3: SPRINT ===
+  {
+    category: "Der Sprint",
+    difficulty: "Mittel",
+    text: "Was darf während eines laufenden Sprints NICHT verändert werden?",
+    options: [
+      "Die Zusammensetzung des Scrum Teams",
+      "Das Sprint-Ziel",
+      "Die Reihenfolge der Product-Backlog-Einträge",
+      "Die Technologien, die bei der Entwicklung eingesetzt werden"
+    ],
+    correct: 1,
+    explanation: "Das Sprint-Ziel ist unveränderlich während des Sprints. Es ist das Commitment für den Sprint. Was hingegen verändert werden kann: der Scope (Inhalt und Umfang) des Sprint Backlogs – dieser kann mit dem Product Owner neu vereinbart werden. Wichtig: Qualität nimmt nie ab, und das Product Backlog wird bei Bedarf verfeinert.",
+    scrumRef: "Scrum Guide 2020: 'During the Sprint: No changes are made that would endanger the Sprint Goal; Quality does not decrease...'"
+  },
+  {
+    category: "Der Sprint",
+    difficulty: "Mittel",
+    text: "Wer hat im Scrum Guide die Befugnis, einen Sprint abzubrechen?",
+    options: [
+      "Der Scrum Master, wenn das Team nicht produktiv ist",
+      "Das gesamte Scrum Team durch Mehrheitsbeschluss",
+      "Nur der Product Owner",
+      "Das Management, wenn Prioritäten sich ändern"
+    ],
+    correct: 2,
+    explanation: "Laut Scrum Guide hat ausschließlich der Product Owner die Befugnis, einen Sprint abzubrechen. Ein Sprint wird abgebrochen, wenn das Sprint-Ziel obsolet wird. Obwohl andere dies empfehlen können, liegt die Entscheidung allein beim Product Owner. Das ist eine klare, prüfungsrelevante Regelung!",
+    scrumRef: "Scrum Guide 2020: 'Only the Product Owner has the authority to cancel the Sprint. A Sprint could be cancelled if the Sprint Goal becomes obsolete.'"
+  },
+  // === BLOCK 4: SPRINT PLANNING ===
+  {
+    category: "Sprint Planning",
+    difficulty: "Mittel",
+    text: "Das Sprint Planning beantwortet laut Scrum Guide drei Themen. Welches der folgenden ist KEIN offizielles Thema des Sprint Plannings?",
+    options: [
+      "Warum ist dieser Sprint wertvoll?",
+      "Was kann in diesem Sprint abgeschlossen (Done) werden?",
+      "Wie werden Stakeholder über den Fortschritt informiert?",
+      "Wie wird die ausgewählte Arbeit erledigt?"
+    ],
+    correct: 2,
+    explanation: "Die drei offiziellen Themen des Sprint Plannings laut Scrum Guide sind: (1) WARUM ist dieser Sprint wertvoll? → Sprint-Ziel, (2) WAS kann Done werden? → Auswahl aus dem Product Backlog, (3) WIE wird die Arbeit erledigt? → Plan der Developers. Die Stakeholder-Kommunikation ist kein Thema des Sprint Plannings.",
+    scrumRef: "Scrum Guide 2020: 'Sprint Planning addresses the following topics: Why is this Sprint valuable? What can be Done this Sprint? How will the chosen work get done?'"
+  },
+  {
+    category: "Sprint Planning",
+    difficulty: "Mittel",
+    text: "Wie lange ist das Sprint Planning für einen einmonatigen Sprint maximal?",
+    options: [
+      "Zwei Stunden",
+      "Vier Stunden",
+      "Acht Stunden",
+      "Sechzehn Stunden"
+    ],
+    correct: 2,
+    explanation: "Die Timebox für das Sprint Planning beträgt maximal acht Stunden für einen einmonatigen Sprint. Bei kürzeren Sprints ist das Event in der Regel kürzer. Diese Timebox ist eine wichtige PSM-I-Prüfungsfrage!",
+    scrumRef: "Scrum Guide 2020: 'Sprint Planning is timeboxed to a maximum of eight hours for a one-month Sprint.'"
+  },
+  // === BLOCK 5: DAILY SCRUM ===
+  {
+    category: "Daily Scrum",
+    difficulty: "Mittel",
+    text: "Wer nimmt laut Scrum Guide am Daily Scrum teil?",
+    options: [
+      "Das gesamte Scrum Team (Product Owner, Scrum Master und Developers)",
+      "Die Developers des Scrum Teams",
+      "Alle Projektbeteiligten, inklusive Stakeholder",
+      "Nur der Scrum Master und die Developers"
+    ],
+    correct: 1,
+    explanation: "Das Daily Scrum ist ein Event für die Developers. Der Product Owner und Scrum Master nehmen nur teil, wenn sie aktiv an Sprint-Backlog-Einträgen arbeiten – dann aber als Developers. Es ist KEIN Statusmeeting für das Management oder die Stakeholder. Die klare Abgrenzung ist prüfungsrelevant!",
+    scrumRef: "Scrum Guide 2020: 'The Daily Scrum is a 15-minute event for the Developers of the Scrum Team... If the Product Owner or Scrum Master are actively working on items in the Sprint Backlog, they participate as Developers.'"
+  },
+  {
+    category: "Daily Scrum",
+    difficulty: "Mittel",
+    text: "Was ist der primäre Zweck des Daily Scrums laut Scrum Guide?",
+    options: [
+      "Statusbericht an den Scrum Master oder Product Owner",
+      "Den Fortschritt in Richtung Sprint-Ziel überprüfen und das Sprint Backlog anpassen",
+      "Probleme lösen und detaillierte technische Diskussionen führen",
+      "Das Scrum Team über abgeschlossene Aufgaben informieren"
+    ],
+    correct: 1,
+    explanation: "Der Zweck des Daily Scrums ist es, den Fortschritt in Richtung Sprint-Ziel zu überprüfen und das Sprint Backlog bei Bedarf anzupassen. Es ist KEIN Statusmeeting! Es geht um Inspektion und Adaptation. Technische Detaildiskussionen können nach dem Daily Scrum stattfinden. Die 15-Minuten-Timebox ermöglicht Fokus und Selbstmanagement.",
+    scrumRef: "Scrum Guide 2020: 'The purpose of the Daily Scrum is to inspect progress toward the Sprint Goal and adapt the Sprint Backlog as necessary.'"
+  },
+  {
+    category: "Daily Scrum",
+    difficulty: "Schwer",
+    text: "Der Scrum Master besteht darauf, dass jeder Developer im Daily Scrum drei Fragen beantwortet: Was habe ich gestern getan? Was mache ich heute? Gibt es Hindernisse? Ist das korrekt laut Scrum Guide?",
+    options: [
+      "Ja, das ist die offizielle Struktur des Daily Scrums laut Scrum Guide",
+      "Nein, der Scrum Guide schreibt keine spezifischen Fragen vor – die Developers wählen Struktur und Techniken selbst",
+      "Ja, aber nur zwei der drei Fragen sind verpflichtend",
+      "Nein, der Scrum Master leitet das Daily Scrum und entscheidet über die Struktur"
+    ],
+    correct: 1,
+    explanation: "Die berühmten 'drei Fragen' sind NICHT im Scrum Guide vorgeschrieben! Die Developers können Struktur und Techniken frei wählen, solange das Daily Scrum sich auf den Fortschritt zum Sprint-Ziel fokussiert und einen umsetzbaren Plan für den nächsten Arbeitstag erstellt. Das ist ein klassischer Praxis-Mythos vs. Scrum-Guide-Logik!",
+    scrumRef: "Scrum Guide 2020: 'The Developers can select whatever structure and techniques they want, as long as their Daily Scrum focuses on progress toward the Sprint Goal...'"
+  },
+  // === BLOCK 6: ARTEFAKTE ===
+  {
+    category: "Artefakte & Commitments",
+    difficulty: "Mittel",
+    text: "Welches Commitment gehört zum Product Backlog?",
+    options: [
+      "Definition of Done",
+      "Sprint-Ziel",
+      "Produkt-Ziel",
+      "Product Vision"
+    ],
+    correct: 2,
+    explanation: "Jedes Artefakt in Scrum hat ein Commitment: Product Backlog → Produkt-Ziel (Product Goal), Sprint Backlog → Sprint-Ziel (Sprint Goal), Increment → Definition of Done. Diese Commitments verbessern Transparenz und Fokus und helfen, den Fortschritt messbar zu machen.",
+    scrumRef: "Scrum Guide 2020: 'Each artifact contains a commitment... For the Product Backlog it is the Product Goal. For the Sprint Backlog it is the Sprint Goal. For the Increment it is the Definition of Done.'"
+  },
+  {
+    category: "Artefakte & Commitments",
+    difficulty: "Mittel",
+    text: "Wer ist verantwortlich für das Erstellen und Pflegen des Product Backlogs?",
+    options: [
+      "Das gesamte Scrum Team gemeinsam",
+      "Der Scrum Master als Prozessverantwortlicher",
+      "Der Product Owner",
+      "Die Developers, da sie die technischen Anforderungen kennen"
+    ],
+    correct: 2,
+    explanation: "Der Product Owner ist accountable für das effektive Product-Backlog-Management. Er kann Aufgaben delegieren, bleibt aber stets verantwortlich. Die vier Aspekte: Produkt-Ziel entwickeln und kommunizieren, Einträge erstellen und kommunizieren, Einträge ordnen und das Product Backlog transparent, sichtbar und verstanden halten.",
+    scrumRef: "Scrum Guide 2020: 'The Product Owner is also accountable for effective Product Backlog management, which includes... The Product Owner may do the above work or may delegate the responsibility to others. Regardless, the Product Owner remains accountable.'"
+  },
+  // === BLOCK 7: SPRINT REVIEW & RETROSPEKTIVE ===
+  {
+    category: "Sprint Review",
+    difficulty: "Mittel",
+    text: "Was ist der Hauptzweck des Sprint Reviews?",
+    options: [
+      "Das Team präsentiert seine Arbeit dem Management zur Genehmigung",
+      "Das Ergebnis des Sprints überprüfen und künftige Anpassungen festlegen",
+      "Der Product Owner bewertet, ob das Sprint-Ziel erreicht wurde",
+      "Die Definition of Done für den nächsten Sprint festlegen"
+    ],
+    correct: 1,
+    explanation: "Der Zweck des Sprint Reviews ist es, das Ergebnis des Sprints zu überprüfen und künftige Anpassungen festzulegen. Es ist ein ARBEITSTERMIN – kein Demo- oder Präsentationsmeeting! Das Scrum Team und Stakeholder besprechen gemeinsam, was als Nächstes zu tun ist. Das Product Backlog kann angepasst werden. Timebox: max. 4 Stunden bei einmonatigem Sprint.",
+    scrumRef: "Scrum Guide 2020: 'The purpose of the Sprint Review is to inspect the outcome of the Sprint and determine future adaptations... The Sprint Review is a working session and the Scrum Team should avoid limiting it to a presentation.'"
+  },
+  {
+    category: "Sprint Retrospective",
+    difficulty: "Mittel",
+    text: "Was ist der primäre Zweck der Sprint Retrospective?",
+    options: [
+      "Fehler aus dem Sprint zu dokumentieren und Schuldige zu identifizieren",
+      "Das Produkt-Increment dem Product Owner zu präsentieren",
+      "Wege zur Steigerung von Qualität und Effektivität zu planen",
+      "Das Sprint-Ziel für den nächsten Sprint festzulegen"
+    ],
+    correct: 2,
+    explanation: "Der Zweck der Sprint Retrospective ist es, Wege zur Steigerung von Qualität und Effektivität zu planen. Das Team überprüft, wie der letzte Sprint in Bezug auf Individuen, Interaktionen, Prozesse, Werkzeuge und Definition of Done verlief. Die wirkungsvollsten Verbesserungen können sogar ins Sprint Backlog des nächsten Sprints aufgenommen werden.",
+    scrumRef: "Scrum Guide 2020: 'The purpose of the Sprint Retrospective is to plan ways to increase quality and effectiveness.'"
+  },
+  {
+    category: "Sprint Retrospective",
+    difficulty: "Mittel",
+    text: "Wie lange dauert die Sprint Retrospective bei einem einmonatigen Sprint maximal?",
+    options: [
+      "Vier Stunden",
+      "Drei Stunden",
+      "Zwei Stunden",
+      "Eine Stunde"
+    ],
+    correct: 1,
+    explanation: "Die Timebox der Sprint Retrospective beträgt maximal drei Stunden für einen einmonatigen Sprint. Bei kürzeren Sprints ist das Event in der Regel kürzer. Die Sprint Retrospective schließt den Sprint ab – sie ist das letzte Event des Sprints.",
+    scrumRef: "Scrum Guide 2020: 'The Sprint Retrospective concludes the Sprint. It is timeboxed to a maximum of three hours for a one-month Sprint.'"
+  },
+  {
+    category: "Sprint Retrospective",
+    difficulty: "Schwer",
+    text: "Das Scrum Team identifiziert in der Sprint Retrospective mehrere Verbesserungsmaßnahmen. Was sagt der Scrum Guide dazu, wie mit diesen umzugehen ist?",
+    options: [
+      "Alle Verbesserungsmaßnahmen werden in einem separaten 'Retrospektive-Backlog' gesammelt",
+      "Die wirkungsvollsten Verbesserungen werden so schnell wie möglich angegangen und können ins Sprint Backlog aufgenommen werden",
+      "Der Scrum Master ist verantwortlich für die Umsetzung aller identifizierten Maßnahmen",
+      "Verbesserungsmaßnahmen werden dem Management zur Genehmigung vorgelegt"
+    ],
+    correct: 1,
+    explanation: "Der Scrum Guide sagt: Die wirkungsvollsten Verbesserungen werden so schnell wie möglich in Angriff genommen. Sie können sogar in das Sprint Backlog für den nächsten Sprint aufgenommen werden. Es gibt im Scrum Guide kein 'Retrospektive-Backlog'. Das Scrum Team entscheidet selbst, wie es die Verbesserungen umsetzt – Selbstmanagement!",
+    scrumRef: "Scrum Guide 2020: 'The Scrum Team identifies the most helpful changes to improve its effectiveness. The most impactful improvements are addressed as soon as possible. They may even be added to the Sprint Backlog for the next Sprint.'"
+  }
+];
+
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+let currentQuestion = 0;
+let score = 0;
+let selectedOption = null;
+let answered = false;
+let shuffledQuestions = [];
+let wrongAnswers = []; // tracks wrong questions for webhook
+let userName = '';
+let userEmail = '';
+
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+
+  if (!name || !emailRegex.test(email)) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  const container = document.getElementById('quiz-screen');
+
+  // Progress
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  // Shuffle options
+  const optionIndices = shuffle([0, 1, 2, 3]);
+  const correctOriginal = q.correct;
+  let newCorrect = optionIndices.indexOf(correctOriginal);
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const optionsHTML = optionIndices.map((origIdx, newIdx) => `
+    <div class="option" data-index="${newIdx}" data-original="${origIdx}" onclick="selectOption(${newIdx}, ${newIdx === newCorrect})">
+      <div class="option-letter">${letters[newIdx]}</div>
+      <span>${q.options[origIdx]}</span>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="question-card active" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty}</div>
+        </div>
+      </div>
+      <div class="options" id="options-container">
+        ${optionsHTML}
+      </div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer(${newCorrect})" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  selectedOption = null;
+  answered = false;
+}
+
+function selectOption(idx, isCorrect) {
+  if (answered) return;
+
+  // Remove previous selection
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+
+  const selected = document.querySelector(`.option[data-index="${idx}"]`);
+  selected.classList.add('selected');
+  selectedOption = { idx, isCorrect };
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer(correctIdx) {
+  if (!selectedOption || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const isCorrect = selectedOption.isCorrect;
+
+  if (isCorrect) score++;
+
+  // Track wrong answers for webhook
+  if (!isCorrect) {
+    wrongAnswers.push({
+      frage: q.text.substring(0, 80) + (q.text.length > 80 ? '...' : ''),
+      kategorie: q.category,
+      erklaerung: q.explanation,
+      richtigeAntwort: q.options[q.correct]
+    });
+  }
+
+  // Style all options
+  document.querySelectorAll('.option').forEach((opt, i) => {
+    opt.classList.add('disabled');
+    const optIdx = parseInt(opt.dataset.index);
+    if (optIdx === selectedOption.idx) {
+      opt.classList.remove('selected');
+      opt.classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+    if (optIdx === correctIdx && !isCorrect) {
+      opt.classList.add('show-correct');
+    }
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.innerHTML = `
+    <div class="feedback-title ${isCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isCorrect ? '✅ Richtig!' : '❌ Leider falsch'}
+    </div>
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref">
+      <strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}
+    </div>
+  `;
+
+  // Card border
+  document.getElementById('qcard').classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+  // Update score display
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+
+  // Buttons
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  // Build wrong_details string for Make/Email
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '🎉 Alle Fragen richtig beantwortet!';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) =>
+      `${i+1}. [${w.kategorie}]\nFrage: ${w.frage}\n✅ Richtig: ${w.richtigeAntwort}\n💡 ${w.erklaerung}\n`
+    ).join('\n---\n');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+
+  // Timestamp
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  // Send to Make webhook
+  sendToWebhook({
+    name: userName,
+    email: userEmail,
+    score: score,
+    total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85) {
+    emoji = '🏆'; title = 'Ausgezeichnet!'; sub = 'Ihr seid gut vorbereitet für die PSM-I-Prüfung.'; color = '#10B981';
+  } else if (percent >= 70) {
+    emoji = '👍'; title = 'Gut gemacht!'; sub = 'Solides Grundlagenwissen – einige Themen könnten noch vertieft werden.'; color = '#7C3AED';
+  } else if (percent >= 55) {
+    emoji = '📚'; title = 'Weiter üben!'; sub = 'Die Grundlagen sind erkennbar – wiederholt die Events und Rollen nochmals.'; color = '#F59E0B';
+  } else {
+    emoji = '💪'; title = 'Nicht aufgeben!'; sub = 'Lest die Erklärungen durch und wiederholt den Scrum Guide Abschnitt zu Events und Rollen.'; color = '#EF4444';
+  }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:48px; margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background: linear-gradient(135deg, ${color}, var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Eine detaillierte Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card">
+        <div class="breakdown-num green">${score}</div>
+        <div class="breakdown-label">✅ Richtig</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-num red">${wrong}</div>
+        <div class="breakdown-label">❌ Falsch</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-num blue">${percent}%</div>
+        <div class="breakdown-label">📊 Score</div>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 PSM-I-Hinweis:</strong> Für die offizielle Prüfung auf scrum.org wird eine Bestehensquote von <strong>85%</strong> benötigt. Das Quiz hat die prüfungsrelevanten Kernthemen der ersten Woche abgedeckt: Scrum Framework, Rollen (Accountabilities!), alle 5 Events mit Timebox, Artefakte & Commitments.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook konnte nicht erreicht werden:', e);
+  }
+}
+
+function restartQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  selectedOption = null;
+  answered = false;
+  shuffledQuestions = shuffle(questions);
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
