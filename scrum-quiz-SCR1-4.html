@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCR1 – Quiz 4 | PBI, Refinement & Schätzung</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #1e0a3c 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(22px,4vw,36px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    .progress-container { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; position:sticky; top:0; z-index:100; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:56px; margin-bottom:16px; }
+    .intro-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .multi-info { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1)); border:1px solid rgba(124,58,237,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .multi-info strong { color:var(--primary-light); }
+    .multi-info p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .q-difficulty { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+    .multi-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.4); border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); margin-top:8px; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#2a1a4a; }
+    .option.selected { border-color:var(--primary); background:rgba(124,58,237,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .scrum-guide-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .psm-hint { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 18px; }
+      .option { padding: 11px 12px; font-size: 13px; }
+      .q-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">PSM I · Zertifizierungsvorbereitung</div>
+    <h1>SCR1 Quiz 4 – PBI, Refinement & Schätzung</h1>
+    <p>Product Backlog Items, Verfeinerung & Aufwandsschätzung – inkl. Prüfungsfallen!</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 20 Fragen</div>
+      <div class="meta-chip">⏱ ~25 Minuten</div>
+      <div class="meta-chip">⚠️ Tricky-Fragen enthalten</div>
+      <div class="meta-chip">✅ Single & Multiple Choice</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container" style="display:none;">
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 20</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🎯</div>
+    <h2 class="intro-title">Quiz 4: PBI, Refinement & Schätzung</h2>
+    <p class="intro-sub">Dieses Quiz prüft dein Wissen zu Product Backlog Items, Backlog Refinement und Aufwandsschätzung. Achtung: Einige Fragen sind bewusst "tricky" – erkenne den Unterschied zwischen Scrum Guide und Praxis-Mythen!</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">20</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">13</div><div class="info-label">Single Choice</div></div>
+      <div class="info-card"><div class="info-num">7</div><div class="info-label">Multiple Choice</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Ziel PSM I</div></div>
+    </div>
+
+    <div class="multi-info">
+      <strong>⚠️ Hinweis: Prüfungsfallen &amp; Mehrfachauswahl</strong>
+      <p>Einige Fragen enthalten Aussagen die in der Praxis üblich sind – aber <strong style="color:var(--accent)">nicht im Scrum Guide stehen</strong>. Bei Mehrfachauswahl musst du <strong>alle richtigen Antworten</strong> wählen. Nur vollständig korrekte Auswahl gibt den vollen Punkt.</p>
+    </div>
+
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung per E-Mail und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+
+  // ══════════════ BLOCK 1: PRODUCT BACKLOG & PBI GRUNDLAGEN ══════════════
+  {
+    category: 'Product Backlog Grundlagen',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was beschreibt der Scrum Guide als Inhalt des Product Backlogs?',
+    options: [
+      'Ausschließlich User Stories, die vom Product Owner genehmigt wurden',
+      'Alles Bekannte, was zur Verbesserung des Produkts benötigt wird',
+      'Nur Features – Bugs und technische Arbeit gehören ins Sprint Backlog',
+      'Eine priorisierte Liste von Anforderungen mit festen Lieferterminen'
+    ],
+    correct: [1],
+    explanation: 'Der Scrum Guide sagt: Das Product Backlog ist eine geordnete Liste von allem, was bekanntermaßen im Produkt benötigt wird. Es enthält keine Vorgabe über das Format (keine User Stories vorgeschrieben!) und enthält alle Arten von Arbeit – Features, Bugs, technische Verbesserungen, Wissen.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog"'
+  },
+  {
+    category: 'Product Backlog Grundlagen',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Wann ist ein Product Backlog vollständig und abgeschlossen?',
+    options: [
+      'Nach dem letzten Sprint, wenn das Produkt released wird',
+      'Wenn alle bekannten User Stories umgesetzt wurden',
+      'Das Product Backlog ist niemals vollständig – es entwickelt sich ständig weiter',
+      'Nach dem ersten Sprint Planning, wenn alle Anforderungen aufgenommen wurden'
+    ],
+    correct: [2],
+    explanation: 'Das Product Backlog ist ein lebendiges Artefakt. Solange ein Produkt existiert, existiert auch sein Product Backlog. Es wird ständig verfeinert, ergänzt und neu geordnet. Vollständig abgeschlossen ist es nie – das ist ein fundamentales Prinzip der empirischen Produktentwicklung.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog"'
+  },
+  {
+    category: 'Product Backlog Grundlagen',
+    type: 'multi',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Welche Aussagen zu Product Backlog Items (PBI) sind laut Scrum Guide korrekt? (Wähle 3)',
+    options: [
+      'PBI können Features, Fixes, Verbesserungen und Wissen enthalten',
+      'PBI müssen als User Stories formuliert sein',
+      'PBI, die im Sprint umgesetzt werden sollen, müssen bis zum Sprint Planning ausreichend klein und verstanden sein',
+      'PBI weiter oben im Product Backlog sind typischerweise detaillierter als PBI weiter unten',
+      'Jedes PBI muss eine Schätzung in Story Points enthalten'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Der Scrum Guide schreibt kein Format für PBI vor – User Stories sind eine verbreitete Praxis, aber kein Scrum-Pflicht. PBI, die bald umgesetzt werden, sollten kleiner und klarer sein (Ready-Prinzip). Oben im Backlog stehen detailliertere, weiter unten gröbere Items. Story Points sind eine Praxismethode, aber kein Scrum-Guide-Inhalt.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog" und "Sprint Planning"'
+  },
+  {
+    category: 'Product Backlog Grundlagen',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Der Product Owner muss sicherstellen, dass alle PBI im Product Backlog nach dem INVEST-Kriterium formuliert sind. Ist das korrekt?',
+    options: [
+      'Ja – INVEST ist ein Pflichtstandard laut Scrum Guide für alle PBI',
+      'Ja – INVEST ist im Scrum Guide als Best Practice verankert',
+      'Nein – INVEST ist eine nützliche Praxismethode, steht aber nicht im Scrum Guide',
+      'Nein – INVEST gilt nur für Sprint Backlog Items, nicht für Product Backlog Items'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) ist eine weit verbreitete Praxismethode zur Beschreibung guter User Stories – steht aber NICHT im Scrum Guide. Der Guide verlangt lediglich, dass PBI "klar und verständlich" sind. In der PSM-I-Prüfung gilt: Was nicht im Scrum Guide steht, ist keine Scrum-Pflicht!',
+    scrumRef: 'Scrum Guide 2020 – kein Verweis auf INVEST. Abschnitt "Product Backlog Refinement"'
+  },
+
+  // ══════════════ BLOCK 2: BACKLOG REFINEMENT ══════════════
+  {
+    category: 'Product Backlog Refinement',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was ist Product Backlog Refinement laut Scrum Guide?',
+    options: [
+      'Ein offizielles Scrum Event mit fester Timebox am Mittwoch jedes Sprints',
+      'Eine fortlaufende Aktivität, bei der PBI detaillierter beschrieben, geordnet und geschätzt werden',
+      'Ein Meeting, das ausschließlich vom Product Owner geleitet wird',
+      'Eine wöchentliche Pflicht-Session nach dem Daily Scrum'
+    ],
+    correct: [1],
+    explanation: 'Refinement ist KEIN offizielles Scrum Event! Es ist eine laufende Aktivität, die das Scrum Team durchführt, wann immer es sinnvoll ist. Der Scrum Guide sagt: "Product Backlog refinement is the act of breaking down and further defining Product Backlog items into smaller more precise items." Weder Timebox noch fixer Termin sind vorgeschrieben.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog Refinement"'
+  },
+  {
+    category: 'Product Backlog Refinement',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Wie viel Zeit sollte das Team laut Scrum Guide für Product Backlog Refinement aufwenden?',
+    options: [
+      'Genau 10% der Sprint-Kapazität – das ist der Scrum-Standard',
+      'Mindestens 20% – der Backlog muss immer gut gefüllt und vorbereitet sein',
+      'Keine feste Vorgabe – das Team entscheidet selbst nach Bedarf',
+      'Maximal 5% – Refinement darf die Sprint-Arbeit nicht behindern'
+    ],
+    correct: [2],
+    explanation: 'Der Scrum Guide nennt keine feste Prozentzahl für Refinement! Die oft genannten "10%" stammen aus älteren Versionen des Scrum Guides und gelten seit 2020 nicht mehr. Das Team entscheidet selbst, wann und wie viel Zeit für Refinement sinnvoll ist.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog Refinement" (keine Prozentangabe)'
+  },
+  {
+    category: 'Product Backlog Refinement',
+    type: 'multi',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was passiert beim Product Backlog Refinement? (Wähle 3 richtige Antworten)',
+    options: [
+      'PBI werden in kleinere, präzisere Einträge aufgeteilt',
+      'PBI werden weiter detailliert und beschrieben',
+      'Das Sprint Goal für den nächsten Sprint wird festgelegt',
+      'PBI werden vom Team geschätzt (falls gewünscht)',
+      'Fertige Increments werden vom PO abgenommen'
+    ],
+    correct: [0, 1, 3],
+    explanation: 'Refinement umfasst das Aufteilen (Splitting), Detaillieren und Schätzen von PBI. Das Sprint Goal wird erst im Sprint Planning definiert – nicht im Refinement. Die Abnahme von Increments ist kein Teil des Refinements, sondern des Sprint Reviews.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Backlog Refinement"'
+  },
+  {
+    category: 'Product Backlog Refinement',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Damit ein PBI "sprint-ready" ist, muss es die "Definition of Ready" (DoR) erfüllen. Stimmt das laut Scrum Guide?',
+    options: [
+      'Ja – die Definition of Ready ist neben der Definition of Done ein zweites offizielles Commitment im Scrum Guide',
+      'Ja – der Product Owner muss alle PBI als "Ready" kennzeichnen bevor sie ins Sprint Planning kommen',
+      'Nein – die Definition of Ready existiert nicht im Scrum Guide und ist eine Praxiserweiterung',
+      'Nein – nur die Developers entscheiden, ob ein PBI sprint-ready ist'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Die "Definition of Ready" (DoR) existiert NICHT im Scrum Guide 2020! Es gibt nur die Definition of Done. Die DoR ist eine verbreitete Praxiserweiterung, aber kein Scrum-Bestandteil. Scrum.org warnt sogar davor, dass eine strikte DoR als "Acceptance Gate" den empirischen Prozess behindern kann. In der PSM-I-Prüfung ist die DoR falsch – es gibt nur die DoD.',
+    scrumRef: 'Scrum Guide 2020 – nur "Definition of Done" als Commitment erwähnt, keine Definition of Ready'
+  },
+
+  // ══════════════ BLOCK 3: PRIORISIERUNG ══════════════
+  {
+    category: 'Priorisierung & Ordnung',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Wie beschreibt der Scrum Guide das Product Backlog in Bezug auf seine Reihenfolge?',
+    options: [
+      'Das Product Backlog ist priorisiert – Items werden nach Priorität 1, 2, 3 geordnet',
+      'Das Product Backlog ist geordnet (ordered) – der PO entscheidet über die Reihenfolge',
+      'Das Product Backlog ist nach Geschäftswert sortiert – der höchste Wert zuerst',
+      'Das Product Backlog ist alphabetisch geordnet für bessere Übersicht'
+    ],
+    correct: [1],
+    explanation: 'Der Scrum Guide verwendet bewusst das Wort "ordered" (geordnet), NICHT "prioritized" (priorisiert)! Das ist eine wichtige Unterscheidung in der PSM-I-Prüfung. "Ordered" ist flexibler – der PO kann die Reihenfolge nach verschiedenen Faktoren bestimmen: Wert, Risiko, Abhängigkeiten, Lerneffekte etc. Ein starres Prioritätsschema ist nicht vorgeschrieben.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Owner": "ordered list"'
+  },
+  {
+    category: 'Priorisierung & Ordnung',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Um das Product Backlog zu ordnen, muss der Product Owner WSJF (Weighted Shortest Job First) oder MoSCoW-Priorisierung anwenden. Ist das korrekt?',
+    options: [
+      'Ja – WSJF ist die von Scrum.org empfohlene Priorisierungsmethode',
+      'Ja – MoSCoW ist Pflicht für alle PSM-I-zertifizierten Product Owner',
+      'Nein – der Scrum Guide schreibt keine Methode zur Ordnung des Backlogs vor',
+      'Nein – nur Story Maps sind erlaubt, da sie den Nutzerwert visualisieren'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Weder WSJF (aus SAFe) noch MoSCoW, noch irgendeine andere Priorisierungsmethode ist im Scrum Guide vorgeschrieben! Der PO entscheidet eigenverantwortlich, wie er das Backlog ordnet. Methoden wie WSJF, MoSCoW, Value vs. Effort-Matrizen sind nützliche Praxiswerkzeuge – aber kein Scrum-Inhalt.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Product Owner": keine Methode vorgeschrieben'
+  },
+
+  // ══════════════ BLOCK 4: AUFWANDSSCHÄTZUNG ══════════════
+  {
+    category: 'Aufwandsschätzung',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Schreibt der Scrum Guide vor, dass das Team PBI in Story Points schätzen muss?',
+    options: [
+      'Ja – Story Points sind das offizielle Schätzverfahren in Scrum',
+      'Ja – laut Scrum Guide müssen alle PBI geschätzt sein bevor der Sprint startet',
+      'Nein – der Scrum Guide schreibt keine Schätzmethode vor',
+      'Nein – aber Story Points sind als "Best Practice" im Scrum Guide erwähnt'
+    ],
+    correct: [2],
+    explanation: 'Story Points stehen NICHT im Scrum Guide! Der Guide sagt, dass PBI "estimated by the people who will perform the work" werden – also durch die Developers. Welche Einheit oder Methode dabei verwendet wird, ist vollständig dem Team überlassen: Story Points, T-Shirt-Größen, Stunden, Fibonacci – alles möglich. Scrum macht hierzu keinerlei Vorgaben.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Developers": schätzen PBI, keine Methodenvorgabe'
+  },
+  {
+    category: 'Aufwandsschätzung',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Planning Poker ist eine Pflichtmethode im Sprint Planning, um sicherzustellen, dass alle Developers gleichberechtigt schätzen. Stimmt das?',
+    options: [
+      'Ja – Planning Poker ist im Scrum Guide als Schätzmethode für das Sprint Planning verankert',
+      'Ja – Planning Poker ist die einzige Methode, die Anchoring-Bias verhindert',
+      'Nein – Planning Poker ist eine nützliche Praxistechnik, aber kein Scrum-Guide-Inhalt',
+      'Nein – Planning Poker ist verboten, da es zu langen Sprint Plannings führt'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Planning Poker (auch Scrum Poker) ist eine beliebte Schätztechnik – aber steht NICHT im Scrum Guide! Es ist eine Praxismethode, die von Mike Cohn popularisiert wurde. Im Sprint Planning entscheidet das Team selbst, wie es Aufwand einschätzt. Scrum.org prüft gezielt, ob du Praxismethoden vom echten Guide-Inhalt unterscheiden kannst.',
+    scrumRef: 'Scrum Guide 2020 – kein Verweis auf Planning Poker'
+  },
+  {
+    category: 'Aufwandsschätzung',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Velocity ist eine wichtige Scrum-Metrik, die der Scrum Master tracken muss, um die Vorhersagbarkeit des Teams zu verbessern. Ist das korrekt?',
+    options: [
+      'Ja – Velocity ist eine Pflichtmetrik im Scrum Guide und muss vom Scrum Master dokumentiert werden',
+      'Ja – Velocity ist die offizielle Scrum-Kennzahl für Teamleistung',
+      'Nein – Velocity existiert nicht im Scrum Guide und ist eine externe Praxismetrik',
+      'Nein – Velocity darf nur vom Product Owner gemessen werden'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Velocity steht NICHT im Scrum Guide 2020! Es ist eine weit verbreitete Praxismetrik (durchschnittliche Story Points pro Sprint), aber Scrum macht keinerlei Vorgaben zur Messung von Teamleistung durch numerische Metriken. Der Scrum Guide fokussiert auf das Liefern von Done-Increments und den empirischen Prozess – nicht auf Velocity-Tracking.',
+    scrumRef: 'Scrum Guide 2020 – kein Verweis auf Velocity'
+  },
+  {
+    category: 'Aufwandsschätzung',
+    type: 'multi',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was sagt der Scrum Guide zur Schätzung von PBI? (Wähle 2 richtige Antworten)',
+    options: [
+      'Die Developers schätzen – nicht der Scrum Master oder Product Owner allein',
+      'Alle PBI müssen geschätzt sein bevor sie ins Product Backlog aufgenommen werden',
+      'Die Schätzmethode ist dem Team überlassen – keine Vorgabe im Scrum Guide',
+      'PBI müssen in Story Points und in Stunden doppelt geschätzt werden',
+      'Schätzungen dürfen nur im Sprint Planning vorgenommen werden'
+    ],
+    correct: [0, 2],
+    explanation: 'Laut Scrum Guide schätzen die Developers (nicht PO oder SM) die PBI. Die Methode ist vollständig freigestellt. PBI müssen nicht zwingend alle geschätzt sein – nur die, die für den nächsten Sprint in Frage kommen, sollten hinreichend verstanden sein. Doppelschätzungen und starre Zeitpunkte sind keine Scrum-Anforderungen.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Developers" und "Product Backlog Refinement"'
+  },
+
+  // ══════════════ BLOCK 5: SPRINT PLANNING & PBI-AUSWAHL ══════════════
+  {
+    category: 'Sprint Planning & PBI-Auswahl',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Wer entscheidet laut Scrum Guide, wie viele PBI ins Sprint Backlog aufgenommen werden?',
+    options: [
+      'Der Product Owner – er legt die Sprint-Kapazität fest',
+      'Der Scrum Master – er kennt die Velocity des Teams am besten',
+      'Die Developers – nur sie können die Menge einschätzen, die sie in einem Sprint leisten können',
+      'Das Scrum Team gemeinsam per Mehrheitsentscheid'
+    ],
+    correct: [2],
+    explanation: 'Die Developers entscheiden, wie viel Arbeit sie in einem Sprint schaffen können. Niemand anders kann oder darf diese Entscheidung treffen. Der PO wählt die Reihenfolge der PBI im Product Backlog – aber wie viele davon ins Sprint Backlog kommen, liegt ausschließlich bei den Developers. Das ist Kern des Selbstmanagements.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Sprint Planning": "No one else tells them how to turn Product Backlog items into Increments of value."'
+  },
+  {
+    category: 'Sprint Planning & PBI-Auswahl',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Im Sprint Planning wählen die Developers immer die PBI mit den höchsten Story Points zuerst aus, um den größten Wert zu liefern. Stimmt das?',
+    options: [
+      'Ja – hohe Story Points bedeuten hohen Wert, also sollten sie priorisiert werden',
+      'Ja – die Developers optimieren die Wertlieferung durch Story-Point-Maximierung',
+      'Nein – Story Points messen Aufwand/Komplexität, nicht Wert; die Auswahl orientiert sich am Sprint Goal und der Backlog-Ordnung',
+      'Nein – die Developers wählen immer die kleinsten PBI, um schneller Done zu sein'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Story Points messen Aufwand oder Komplexität – NICHT Geschäftswert! Hohe Story Points bedeuten "schwierig/umfangreich", nicht "wertvoll". Die Auswahl der PBI orientiert sich am Sprint Goal (Warum) und der Ordnung des Product Backlogs (Wert durch den PO bestimmt). Die Developers wählen dann die PBI, die zum Sprint Goal beitragen und die sie für leistbar halten.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Sprint Planning"'
+  },
+  {
+    category: 'Sprint Planning & PBI-Auswahl',
+    type: 'multi',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was müssen PBI erfüllen, damit sie laut Scrum Guide für das Sprint Planning geeignet sind? (Wähle 2)',
+    options: [
+      'Sie müssen die Definition of Ready erfüllen',
+      'Sie müssen ausreichend klein sein, um innerhalb eines Sprints Done werden zu können',
+      'Sie müssen in Story Points geschätzt sein',
+      'Sie müssen vom Scrum Team ausreichend verstanden sein, um sie konfident auszuwählen',
+      'Sie müssen Akzeptanzkriterien in Gherkin-Syntax enthalten'
+    ],
+    correct: [1, 3],
+    explanation: 'PBI sollten klein genug sein (damit Done in einem Sprint erreichbar ist) und ausreichend verstanden sein (damit das Team sie sicher auswählen kann). Die "Definition of Ready" existiert nicht im Scrum Guide. Story Points sind keine Pflicht. Gherkin-Syntax (Given/When/Then) ist eine Praxistechnik, kein Scrum-Standard.',
+    scrumRef: 'Scrum Guide 2020 – Abschnitt "Sprint Planning": PBI must be "ready"'
+  },
+
+  // ══════════════ BLOCK 6: FORTGESCHRITTENE PRÜFUNGSLOGIK ══════════════
+  {
+    category: 'Prüfungslogik: Guide vs. Praxis',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer (Tricky!)',
+    tricky: true,
+    text: '⚠️ TRICKY: Burn-down Charts sind ein offizielles Scrum-Artefakt und müssen vom Scrum Master täglich aktualisiert werden. Stimmt das?',
+    options: [
+      'Ja – Burn-down Charts sind Teil des Sprint Backlogs laut Scrum Guide',
+      'Ja – sie sind Pflicht für die Transparenz im Sprint',
+      'Nein – Burn-down Charts sind eine nützliche Praxistechnik, aber kein Scrum-Guide-Artefakt',
+      'Nein – Burn-up Charts sind Pflicht, Burn-down Charts sind veraltet'
+    ],
+    correct: [2],
+    explanation: '⚠️ PRÜFUNGSFALLE! Burn-down Charts stehen NICHT im Scrum Guide 2020! Sie wurden in früheren Versionen erwähnt, aber im Guide 2020 bewusst entfernt. Der Scrum Guide erwähnt nur, dass der Fortschritt in Richtung Sprint Goal transparent sein soll – wie das visualisiert wird, entscheidet das Team. Burn-downs sind praktisch, aber kein Scrum-Pflichtartefakt.',
+    scrumRef: 'Scrum Guide 2020 – Burn-down Charts wurden bewusst entfernt'
+  },
+  {
+    category: 'Prüfungslogik: Guide vs. Praxis',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Welche der folgenden Aussagen beschreiben Praxismethoden, die NICHT im Scrum Guide 2020 stehen? (Wähle 3)',
+    options: [
+      'User Stories im Format "Als [Rolle] möchte ich [Funktion], damit [Nutzen]"',
+      'Story Points als Schätzeinheit',
+      'Definition of Done als Commitment für das Increment',
+      'Planning Poker zur Aufwandsschätzung',
+      'Velocity-Tracking zur Vorhersage künftiger Sprints'
+    ],
+    correct: [0, 1, 3],
+    explanation: '⚠️ PRÜFUNGSFALLE! User Stories (Format), Story Points und Planning Poker stehen NICHT im Scrum Guide – sie sind verbreitete Praxismethoden. Die Definition of Done (Antwort C) IST im Scrum Guide als Commitment für das Increment verankert. Velocity-Tracking (Antwort E) ist ebenfalls NICHT im Guide – aber diese Frage fragt nach 3 Antworten. DoD ist korrekt im Guide, daher ist sie richtig.',
+    scrumRef: 'Scrum Guide 2020 – nur DoD ist offiziell. User Stories, Story Points, Velocity, Planning Poker sind externe Praxismethoden.'
+  },
+  {
+    category: 'Prüfungslogik: Guide vs. Praxis',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Das Team diskutiert, ob es Story Points oder Stunden für die Schätzung verwenden soll. Wie sollte der Scrum Master reagieren?',
+    options: [
+      'Er gibt vor, Story Points zu verwenden – das ist der Scrum-Standard',
+      'Er empfiehlt Stunden, da diese präziser und objektiver sind',
+      'Er unterstützt das Team dabei, selbst eine passende Methode zu wählen – Scrum schreibt keine vor',
+      'Er eskaliert die Entscheidung an den Product Owner, da Schätzungen Auswirkungen auf Wert und Planung haben'
+    ],
+    correct: [2],
+    explanation: 'Der Scrum Master fördert Selbstmanagement des Teams. Da Scrum keine Schätzmethode vorschreibt, ist es Aufgabe des Teams, die für sie passende Methode zu finden. Der SM coacht und begleitet – gibt aber keine Methode vor. Diese Frage prüft Servant Leadership und das Verständnis von Selbstmanagement.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Master "serves the Scrum Team", Developers sind self-managing'
+  }
+
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let totalPoints = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  totalPoints = shuffledQuestions.length;
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const isMulti = q.type === 'multi';
+  const letters = ['A','B','C','D','E','F'];
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${isMulti ? '☐' : letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const multiBadge = isMulti
+    ? `<div class="multi-badge">✦ MEHRERE ANTWORTEN – Bitte ${q.correct.length} auswählen</div>`
+    : '';
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty} · ${isMulti ? 'Multiple Choice' : 'Single Choice'}</div>
+          ${multiBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  const q = shuffledQuestions[currentQuestion];
+  const isMulti = q.type === 'multi';
+  const option = document.querySelector(`.option[data-index="${idx}"]`);
+
+  if (!isMulti) {
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.option-marker').textContent = ['A','B','C','D','E','F'][parseInt(o.dataset.index)];
+    });
+    selectedOptions.clear();
+    selectedOptions.add(idx);
+    option.classList.add('selected');
+    option.querySelector('.option-marker').textContent = '✓';
+  } else {
+    if (selectedOptions.has(idx)) {
+      selectedOptions.delete(idx);
+      option.classList.remove('selected');
+      option.querySelector('.option-marker').textContent = '☐';
+    } else {
+      selectedOptions.add(idx);
+      option.classList.add('selected');
+      option.querySelector('.option-marker').textContent = '☑';
+    }
+  }
+  document.getElementById('check-btn').disabled = selectedOptions.size === 0;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions).sort();
+  const correctArr = [...correctSet].sort();
+
+  const isFullyCorrect = selectedArr.length === correctArr.length &&
+    selectedArr.every(i => correctSet.has(i));
+
+  if (isFullyCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isFullyCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isFullyCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isFullyCorrect ? '✅ Richtig!' : '❌ Leider nicht vollständig korrekt'}
+    </div>
+    ${!isFullyCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort(en): ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref"><strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isFullyCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isFullyCorrect) {
+    const correctTexts = q.correct.map(i => q.options[i]).join(' / ');
+    wrongAnswers.push({
+      frage: q.text.substring(0, 90) + (q.text.length > 90 ? '...' : ''),
+      kategorie: q.category,
+      typ: q.type === 'multi' ? 'Multiple Choice' : 'Single Choice',
+      erklaerung: q.explanation,
+      richtigeAntwort: correctTexts
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT
+// ─────────────────────────────────────────────
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '<p style="color:#10B981;font-size:15px;font-weight:700;margin:0;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) => `
+      <div style="background:#1e2433;border-left:4px solid #C703FF;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:#C703FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${i+1}. ${w.kategorie} · ${w.typ}
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">❓ ${w.frage}</div>
+        <div style="background:#0d3320;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <span style="color:#10B981;font-weight:700;">✅ Richtige Antwort(en):</span>
+          <span style="color:#d1fae5;font-size:12px;"> ${w.richtigeAntwort}</span>
+        </div>
+        <div style="color:#9AA4B2;font-size:12px;line-height:1.7;">💡 ${w.erklaerung}</div>
+      </div>
+    `).join('');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    score: score, total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails,
+    quiz: 'SCR1-Quiz-4'
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85)      { emoji='🏆'; title='Ausgezeichnet!';   sub='PSM-I-Niveau sicher erreicht – Prüfung angehen!';            color='#10B981'; }
+  else if (percent >= 70) { emoji='👍'; title='Sehr gut!';        sub='Starkes Fundament – Sprint-Logik und Events nochmals vertiefen.'; color='#7C3AED'; }
+  else if (percent >= 55) { emoji='📚'; title='Weiter üben!';     sub='Gute Basis – Advanced-Themen noch einmal durcharbeiten.';     color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!';  sub='Scrum Guide Abschnitte zu Sprint, Events & Artifacts lesen.';  color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 PSM-I-Prüfungshinweis:</strong> Merke: <strong>User Stories, Story Points, Velocity, Planning Poker, Burn-down Charts, Definition of Ready und INVEST sind NICHT im Scrum Guide 2020!</strong> Genau solche Praxis-Mythen erscheinen als falsche Antwortoptionen. Ziel: <strong>85% Bestehensquote.</strong>
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQuestion = 0; score = 0; selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
