@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCR1 – Quiz 6 | PSM I Zertifizierungsvorbereitung</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #1e0a3c 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(22px,4vw,36px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    .progress-container { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; position:sticky; top:0; z-index:100; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:56px; margin-bottom:16px; }
+    .intro-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .multi-info { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1)); border:1px solid rgba(124,58,237,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .multi-info strong { color:var(--primary-light); }
+    .multi-info p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .q-difficulty { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+    .multi-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.4); border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); margin-top:8px; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#2a1a4a; }
+    .option.selected { border-color:var(--primary); background:rgba(124,58,237,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .scrum-guide-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .psm-hint { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 18px; }
+      .option { padding: 11px 12px; font-size: 13px; }
+      .q-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">PSM I · Zertifizierungsvorbereitung</div>
+    <h1>SCR1 Quiz 6 – PSM I Vorbereitung</h1>
+    <p>30 anspruchsvolle Fragen – Szenarien, Prüfungslogik & Guide-Präzision</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 30 Fragen</div>
+      <div class="meta-chip">⏱ ~40 Minuten</div>
+      <div class="meta-chip">🎓 PSM I Zertifizierung</div>
+      <div class="meta-chip">✅ Single & Multiple Choice</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container" style="display:none;">
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 20</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🎓</div>
+    <h2 class="intro-title">Quiz 6: PSM I Zertifizierungsvorbereitung</h2>
+    <p class="intro-sub">30 anspruchsvolle Fragen direkt auf PSM-I-Niveau: Szenario-Fragen, Prüfungslogik, exakte Guide-Formulierungen und typische Fallen. Genau so wie in der echten scrum.org-Prüfung!</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">30</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">20</div><div class="info-label">Single Choice</div></div>
+      <div class="info-card"><div class="info-num">10</div><div class="info-label">Multiple Choice</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Ziel PSM I</div></div>
+    </div>
+
+    <div class="multi-info">
+      <strong>ℹ️ Wichtiger Hinweis zu Mehrfachauswahl-Fragen</strong>
+      <p>Bei Fragen mit dem Badge <strong style="color:var(--accent)">MEHRERE ANTWORTEN</strong> musst du <strong>alle richtigen Antworten</strong> auswählen. Die Frage zeigt dir wie viele Antworten erwartet werden. Nur wenn du alle richtigen und keine falschen ausgewählt hast, gibt es den vollen Punkt.</p>
+    </div>
+
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung per E-Mail und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+
+  // ══════ BLOCK 1: SCRUM THEORIE & EMPIRISMUS ══════
+  {
+    category: 'Scrum Theorie & Empirismus',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein erfahrener Scrum Master schlägt vor, die Sprint Retrospektive zu überspringen, weil das Team sehr harmonisch zusammenarbeitet und keine Probleme hat. Was sagt der Scrum Guide dazu?',
+    options: [
+      'Das ist eine sinnvolle Entscheidung – Retrospektiven sind optional wenn das Team gut läuft',
+      'Das Team entscheidet selbst ob Events stattfinden – es ist selbstmanagend',
+      'Die Retrospektive ist ein formales Scrum-Event mit fester Timebox – sie darf nicht gestrichen werden',
+      'Der Product Owner muss zustimmen bevor ein Event gestrichen wird'
+    ],
+    correct: [2],
+    explanation: 'Alle Scrum Events sind formal und verpflichtend. Der Scrum Guide erlaubt keine Streichung von Events. "Keine Probleme" ist kein Grund – die Retrospektive dient der kontinuierlichen Verbesserung von Qualität und Effektivität, nicht nur der Problemlösung. Ein "harmonisches Team" kann trotzdem besser werden.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Retrospective: "The purpose of the Sprint Retrospective is to plan ways to increase quality and effectiveness."'
+  },
+  {
+    category: 'Scrum Theorie & Empirismus',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Aussagen beschreiben korrekt, wie Empirie in Scrum funktioniert? (Wähle 3)',
+    options: [
+      'Entscheidungen basieren auf dem was beobachtet und erfahren wurde',
+      'Scrum macht alle Prozesse vollständig vorhersagbar und planbar',
+      'Häufige Inspektion des Fortschritts ermöglicht frühe Anpassung',
+      'Transparenz ist Voraussetzung für sinnvolle Inspektion',
+      'Erfahrungen aus der Vergangenheit ersetzen zukünftige Planung'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Empirie basiert auf drei Säulen: Transparenz (Voraussetzung), Inspektion (regelmäßige Überprüfung) und Adaptation (Anpassung). Scrum macht Prozesse NICHT vorhersagbar – im Gegenteil: es nutzt Empirie gerade weil die Zukunft unvorhersehbar ist. Vergangene Erfahrungen ergänzen Planung, ersetzen sie aber nicht.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Theory: "Scrum employs an iterative, incremental approach to optimize predictability and control risk."'
+  },
+  {
+    category: 'Scrum Theorie & Empirismus',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Das Scrum Team liefert seit Monaten konsistent Increments. Der Product Owner schlägt vor, die Sprint Reviews zu verkürzen auf 30 Minuten um Zeit zu sparen. Ist das möglich?',
+    options: [
+      'Nein – die Timebox für Sprint Reviews beträgt immer 4 Stunden, egal wie gut das Team läuft',
+      'Ja – 4 Stunden ist das Maximum für einmonatige Sprints; kürzere Sprints haben kürzere Timeboxen',
+      'Ja – aber nur wenn alle Stakeholder zustimmen',
+      'Nein – Timeboxen dürfen nie geändert werden'
+    ],
+    correct: [1],
+    explanation: '4 Stunden ist die MAXIMALE Timebox für einen einmonatigen Sprint – keine Pflichtlänge. Bei kürzeren Sprints sind die Events entsprechend kürzer. Ein Sprint Review kann also auch kürzer sein als das Maximum. Der Scrum Guide definiert Obergrenzen, keine festen Längen.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Review: "This is a four hour maximum event for a one-month Sprint. For shorter Sprints, the event is usually shorter."'
+  },
+  {
+    category: 'Scrum Theorie & Empirismus',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was versteht der Scrum Guide unter "selbstmanagend" in Bezug auf das Scrum Team?',
+    options: [
+      'Das Team braucht keinen Manager und arbeitet völlig autonom ohne Regeln',
+      'Das Team entscheidet intern wer was, wann und wie macht',
+      'Jeder im Team ist sein eigener Projektleiter',
+      'Das Team braucht keine Unterstützung von außen'
+    ],
+    correct: [1],
+    explanation: 'Selbstmanagement bedeutet laut Scrum Guide: das Team entscheidet intern über "who does what, when, and how." Das bedeutet nicht Regellosigkeit – Scrum gibt den Rahmen vor. Das Team braucht durchaus Unterstützung (z.B. durch den SM), ist aber eigenverantwortlich in der Ausführung.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Team: "They are self-managing, meaning they internally decide who does what, when, and how."'
+  },
+  {
+    category: 'Scrum Theorie & Empirismus',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Welche zwei Aussagen über das Scrum Team sind laut Scrum Guide korrekt? (Wähle 2)',
+    options: [
+      'Das Scrum Team ist für alle produktbezogenen Aktivitäten accountable – von Stakeholder-Zusammenarbeit bis Verifizierung',
+      'Die Developers sind accountable für das Erstellen des Increments, der PO für den Wert – beide tragen keine gemeinsame Verantwortung',
+      'Das Scrum Team ist cross-funktional – es hat alle Fähigkeiten um jeden Sprint ein wertvolles Increment zu liefern',
+      'Das Scrum Team hat einen Team Lead der bei Konflikten entscheidet'
+    ],
+    correct: [0, 2],
+    explanation: 'Das Scrum Team ist accountable für alle produktbezogenen Aktivitäten. Es ist cross-funktional – alle nötigen Fähigkeiten sind im Team vorhanden. Es gibt keinen Team Lead in Scrum. PO und Developers tragen zwar unterschiedliche Accountabilities, aber das Team trägt gemeinsam Verantwortung für das Produkt.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Team: "The Scrum Team is responsible for all product-related activities from stakeholder collaboration, verification, maintenance, operation, experimentation, research and development, and anything else that might be required."'
+  },
+
+  // ══════ BLOCK 2: PRODUCT OWNER & PRODUCT BACKLOG ══════
+  {
+    category: 'Product Owner & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Product Owner delegiert die komplette Verwaltung des Product Backlogs an einen Business Analyst. Was sagt der Scrum Guide dazu?',
+    options: [
+      'Das ist verboten – der PO darf nichts delegieren',
+      'Das ist erlaubt – der PO bleibt aber accountable',
+      'Das ist erlaubt – Accountability geht auf den BA über',
+      'Das entscheidet das Scrum Team gemeinsam'
+    ],
+    correct: [1],
+    explanation: 'Der Product Owner darf Arbeit delegieren – aber die Accountability bleibt immer beim PO. Er kann nicht seine Verantwortung übertragen. Wer den Product Owner "ersetzt" oder überstimmt, verletzt den Scrum Guide. Für einen PO als Erfolg gilt: er muss respektiert werden – Entscheidungen werden nicht umgangen.',
+    scrumRef: 'Scrum Guide 2020 – The Product Owner: "The Product Owner may do the above work or may delegate the responsibility to others. Regardless, the Product Owner remains accountable."'
+  },
+  {
+    category: 'Product Owner & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Was muss laut Scrum Guide erfüllt sein, damit der Product Owner als effektiv gilt?',
+    options: [
+      'Er muss jeden Sprint mindestens 3 neue PBI ins Backlog aufnehmen',
+      'Seine Entscheidungen müssen von der gesamten Organisation respektiert werden',
+      'Er muss täglich mit den Developers über Backlog-Prioritäten sprechen',
+      'Er muss 80% seiner Zeit mit Stakeholdern verbringen'
+    ],
+    correct: [1],
+    explanation: 'Der Scrum Guide sagt explizit: "For Product Owners to succeed, the entire organization must respect their decisions." Wenn PO-Entscheidungen umgangen oder überstimmt werden – z.B. durch Manager die direkt mit Developers sprechen – wird die Rolle des PO untergraben.',
+    scrumRef: 'Scrum Guide 2020 – The Product Owner: "For Product Owners to succeed, the entire organization must respect their decisions."'
+  },
+  {
+    category: 'Product Owner & Product Backlog',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Eigenschaften beschreibt der Scrum Guide für Product Backlog Items, die für den nächsten Sprint geeignet sind? (Wähle 3)',
+    options: [
+      'Sie müssen die Definition of Ready erfüllen',
+      'Sie müssen ausreichend klein sein um innerhalb eines Sprints fertiggestellt zu werden',
+      'Sie müssen vom gesamten Scrum Team ausreichend verstanden werden',
+      'Sie müssen Akzeptanzkriterien enthalten',
+      'Sie müssen typischerweise durch Refinement-Aktivitäten ein hohes Maß an Transparenz erreicht haben'
+    ],
+    correct: [1, 2, 4],
+    explanation: 'Laut Scrum Guide müssen PBI für Sprint Planning geeignet sein: (1) klein genug um in einem Sprint Done zu werden, (2) ausreichend vom Team verstanden ("sufficiently understood"), (3) typischerweise durch Refinement transparent gemacht. Definition of Ready ist NICHT im Guide. Akzeptanzkriterien und Story Points sind ebenfalls keine Guide-Anforderungen.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Planning: "Product Backlog items that can be Done by the Scrum Team within one Sprint are deemed ready for selection in a Sprint Planning event. They usually acquire this degree of transparency after refining activities."'
+  },
+  {
+    category: 'Product Owner & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: true,
+    text: '⚠️ TRICKY: Wie viele Product Goals darf ein Scrum Team laut Scrum Guide gleichzeitig verfolgen?',
+    options: [
+      'Beliebig viele – der PO priorisiert sie',
+      'Maximal zwei – eines pro Quartal',
+      'Genau eines – das aktuelle Product Goal muss erreicht oder aufgegeben werden bevor das nächste beginnt',
+      'Das entscheidet die Organisation'
+    ],
+    correct: [2],
+    explanation: 'Laut Scrum Guide kann das Scrum Team nur ein Product Goal auf einmal verfolgen. Das aktuelle Product Goal muss "fulfilled or abandoned" sein bevor das Team sich dem nächsten widmen kann. Das schafft Fokus und verhindert, dass das Team sich verzettelt.',
+    scrumRef: 'Scrum Guide 2020 – Commitment: Product Goal: "The Scrum Team must fulfill (or abandon) one objective before taking on the next."'
+  },
+  {
+    category: 'Product Owner & Product Backlog',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Mehrere Scrum Teams arbeiten am selben Produkt. Welche zwei Aussagen sind laut Scrum Guide korrekt? (Wähle 2)',
+    options: [
+      'Jedes Team hat seinen eigenen Product Owner',
+      'Es gibt genau einen Product Backlog für das gesamte Produkt',
+      'Jedes Team hat sein eigenes Product Backlog',
+      'Es gibt genau einen Product Owner für das gesamte Produkt'
+    ],
+    correct: [1, 3],
+    explanation: 'Bei mehreren Scrum Teams am selben Produkt gilt: ein Product Backlog, ein Product Owner. Das ist entscheidend für Konsistenz und klare Priorisierung. Mehrere POs oder mehrere Backlogs für ein Produkt widersprechen dem Scrum Guide.',
+    scrumRef: 'Scrum Guide 2020 – Multiple Scrum Teams: "If Scrum Teams become too large, they should consider reorganizing into multiple cohesive Scrum Teams, each focused on the same product. Therefore, they should share the same Product Goal, Product Backlog, and Product Owner."'
+  },
+
+  // ══════ BLOCK 3: SPRINT PLANNING & SPRINT GOAL ══════
+  {
+    category: 'Sprint Planning & Sprint Goal',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Beim Sprint Planning stellt das Team fest, dass die Developers nicht genug Kapazität haben, um alle vom PO gewünschten PBI umzusetzen. Wer entscheidet was ins Sprint Backlog kommt?',
+    options: [
+      'Der Product Owner – er priorisiert und entscheidet über den Scope',
+      'Der Scrum Master – er moderiert und hat die finale Entscheidung',
+      'Die Developers – nur sie können ihre eigene Kapazität einschätzen',
+      'Das gesamte Scrum Team per Abstimmung'
+    ],
+    correct: [2],
+    explanation: 'Nur die Developers können einschätzen wie viel Arbeit sie in einem Sprint erledigen können. Der PO wählt zwar die PBI aus und erklärt deren Wichtigkeit – aber die Menge der Arbeit entscheiden allein die Developers. Niemand darf ihnen eine Kapazität vorschreiben.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Planning: "Through discussion with the Product Owner, the Developers select items from the Product Backlog to include in the current Sprint. The Scrum Team may refine these items during this process... Only the Developers can assess what they are capable of accomplishing over the upcoming Sprint."'
+  },
+  {
+    category: 'Sprint Planning & Sprint Goal',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Was passiert laut Scrum Guide wenn das Sprint Goal während des Sprints obsolet wird?',
+    options: [
+      'Das Team passt das Sprint Goal eigenständig an die neuen Gegebenheiten an',
+      'Der Scrum Master bricht den Sprint sofort ab',
+      'Der Product Owner kann den Sprint abbrechen – es ist die einzige Person die das darf',
+      'Das Team ignoriert das Problem und liefert was möglich ist'
+    ],
+    correct: [2],
+    explanation: 'Wenn das Sprint Goal obsolet wird, kann NUR der Product Owner den Sprint abbrechen – und zwar genau dann. Das ist die einzige Situation in der ein Sprint abgebrochen werden sollte. Das Team passt das Sprint Goal NICHT selbst an, und der Scrum Master bricht nicht eigenständig ab.',
+    scrumRef: 'Scrum Guide 2020 – The Sprint: "A Sprint could be cancelled if the Sprint Goal becomes obsolete. Only the Product Owner has the authority to cancel the Sprint."'
+  },
+  {
+    category: 'Sprint Planning & Sprint Goal',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Aussagen über das Sprint Goal sind laut Scrum Guide korrekt? (Wähle 3)',
+    options: [
+      'Das Sprint Goal schafft Kohärenz und Fokus für den Sprint',
+      'Das Sprint Goal kann vom PO jederzeit während des Sprints angepasst werden',
+      'Das Sprint Goal wird während des Sprint Plannings erstellt',
+      'Das Sprint Goal ermöglicht dem Team Flexibilität bei der Umsetzung',
+      'Das Sprint Goal besteht aus einer Liste aller PBI die im Sprint umgesetzt werden'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Das Sprint Goal: schafft Kohärenz und Fokus, wird im Sprint Planning erstellt, und ermöglicht Flexibilität – das Team kann bei Schwierigkeiten mit einem PBI den Scope anpassen solange das Sprint Goal erreicht wird. Es kann NICHT während des Sprints geändert werden. Es ist kein PBI-Katalog.',
+    scrumRef: 'Scrum Guide 2020 – Commitment: Sprint Goal: "The Sprint Goal is the single objective for the Sprint... The Sprint Goal also creates coherence and focus... As the Developers work during the Sprint, they keep the Sprint Goal in mind."'
+  },
+  {
+    category: 'Sprint Planning & Sprint Goal',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Scrum Team beginnt einen neuen Sprint ohne klares Sprint Goal, weil der Product Owner nicht entscheiden konnte welche PBI am wichtigsten sind. Was sollte passieren?',
+    options: [
+      'Der Scrum Master definiert ein Sprint Goal damit der Sprint starten kann',
+      'Das Sprint Planning wird verlängert bis ein Sprint Goal gemeinsam erarbeitet ist',
+      'Die Developers wählen die PBI selbst aus und starten',
+      'Das Sprint Planning wird abgebrochen und auf den nächsten Tag verschoben'
+    ],
+    correct: [1],
+    explanation: 'Das Sprint Goal ist Pflicht – ein Sprint ohne Sprint Goal widerspricht dem Scrum Guide. Das Sprint Planning wird verlängert (aber bleibt timeboxed auf max. 8h) bis ein sinnvolles Sprint Goal gefunden ist. Der SM definiert kein Sprint Goal für den PO – das ist dessen Accountability.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Planning: "The entire Scrum Team collaborates on understanding the work of the Sprint... The Sprint Goal must be finalized prior to the end of Sprint Planning."'
+  },
+
+  // ══════ BLOCK 4: DAILY SCRUM & EVENTS ══════
+  {
+    category: 'Daily Scrum & Events',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Developer ist krank und fehlt beim Daily Scrum. Wie wirkt sich das auf die Timebox aus?',
+    options: [
+      'Das Daily Scrum wird auf 30 Minuten verlängert um den fehlenden Developer zu kompensieren',
+      'Das Daily Scrum findet statt und bleibt bei 15 Minuten – die Timebox ändert sich nicht',
+      'Das Daily Scrum wird verschoben bis alle Developers anwesend sind',
+      'Der Scrum Master übernimmt die Aufgaben des fehlenden Developers im Daily'
+    ],
+    correct: [1],
+    explanation: 'Die Timebox von 15 Minuten gilt immer – unabhängig von Abwesenheiten. Das Daily Scrum findet täglich statt. Die Anwesenheit aller Developers ist erwünscht aber nicht immer möglich. Die Timebox wird NICHT verlängert oder das Event verschoben.',
+    scrumRef: 'Scrum Guide 2020 – Daily Scrum: "The Daily Scrum is a 15-minute event for the Developers of the Scrum Team."'
+  },
+  {
+    category: 'Daily Scrum & Events',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Was ist laut Scrum Guide der primäre Zweck des Daily Scrums?',
+    options: [
+      'Fortschritt an den Scrum Master und Product Owner berichten',
+      'Impediments identifizieren und sofort lösen',
+      'Den Fortschritt in Richtung Sprint Goal inspizieren und den Arbeitstag anpassen',
+      'Die drei Fragen beantworten: Was habe ich gestern gemacht, was mache ich heute, gibt es Hindernisse?'
+    ],
+    correct: [2],
+    explanation: 'Der Hauptzweck ist Inspektion des Fortschritts in Richtung Sprint Goal und Anpassung der geplanten Arbeit. Die "drei Fragen" stehen NICHT im Scrum Guide 2020 – sie wurden bewusst entfernt. Das Daily Scrum ist kein Statusbericht an den SM oder PO.',
+    scrumRef: 'Scrum Guide 2020 – Daily Scrum: "The purpose of the Daily Scrum is to inspect progress toward the Sprint Goal and adapt the Sprint Backlog as necessary, adjusting the upcoming planned work."'
+  },
+  {
+    category: 'Daily Scrum & Events',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Aussagen über Scrum Events sind laut Scrum Guide korrekt? (Wähle 3)',
+    options: [
+      'Alle Events sind timeboxed – das schafft Regelmäßigkeit und minimiert andere Meetings',
+      'Events können kombiniert werden um Zeit zu sparen wenn das Team reif genug ist',
+      'Der Sprint ist ein Container-Event der alle anderen Events enthält',
+      'Scrum Events schaffen Transparenz und Möglichkeiten zur Inspektion und Anpassung',
+      'Events sind optional wenn das Team bereits gut kommuniziert'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Scrum Events sind timeboxed, schaffen Transparenz/Inspektion/Anpassung, und der Sprint ist das Container-Event für alle anderen. Sie können NICHT kombiniert oder weggelassen werden – alle sind verpflichtend. Gute Kommunikation ersetzt keine Events.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Events: "The Sprint is a container for all other events... All events are time-boxed events... Scrum Events are designed to... create regularity and to minimize the need for meetings not defined in Scrum."'
+  },
+  {
+    category: 'Daily Scrum & Events',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: true,
+    text: '⚠️ TRICKY: Wer ist laut Scrum Guide verantwortlich dafür, dass alle Scrum Events stattfinden?',
+    options: [
+      'Der Product Owner – er ist accountable für den Wert',
+      'Die Developers – sie führen die meiste Arbeit durch',
+      'Der Scrum Master – er stellt sicher dass alle Events stattfinden und produktiv sind',
+      'Das gesamte Scrum Team gemeinsam'
+    ],
+    correct: [2],
+    explanation: 'Der Scrum Master stellt sicher, dass alle Scrum Events stattfinden, innerhalb der Timebox bleiben und produktiv sind. Das ist eine der zentralen Accountabilities des Scrum Masters gegenüber dem Scrum Team.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "The Scrum Master serves the Scrum Team in several ways, including: Causing the removal of impediments... Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox."'
+  },
+
+  // ══════ BLOCK 5: ARTEFAKTE, INCREMENT & DOD ══════
+  {
+    category: 'Artefakte, Increment & DoD',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Das Scrum Team hat am Ende eines Sprints ein Increment erstellt, das die DoD erfüllt. Der Product Owner entscheidet, es nicht zu releasen. Ist das Increment trotzdem gültig?',
+    options: [
+      'Nein – ein Increment ist nur gültig wenn es released wird',
+      'Nein – der PO muss das Increment formal abnahmen',
+      'Ja – das Increment ist gültig sobald es die DoD erfüllt; Release ist eine separate PO-Entscheidung',
+      'Ja – aber nur wenn das Scrum Team zustimmt'
+    ],
+    correct: [2],
+    explanation: 'Ein Increment ist "Done" wenn es die DoD erfüllt – unabhängig vom Release. Der Product Owner entscheidet wann ein Increment released wird, aber das ändert nichts an seinem "Done"-Status. "Done" und "Released" sind zwei verschiedene Zustände in Scrum.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "The moment a Product Backlog item meets the Definition of Done, an Increment is born. The Increment must be usable... The decision to release... is entirely at the discretion of the Product Owner."'
+  },
+  {
+    category: 'Artefakte, Increment & DoD',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Aussagen über das Increment sind laut Scrum Guide korrekt? (Wähle 3)',
+    options: [
+      'Pro Sprint kann es mehrere Increments geben',
+      'Das Increment muss am Ende jedes Sprints deployed sein',
+      'Das Increment muss am Ende jedes Sprints nutzbar sein',
+      'Mehrere Increments können im Sprint Review präsentiert werden',
+      'Das Increment enthält nur Arbeit aus dem aktuellen Sprint'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Laut Scrum Guide: Pro Sprint kann es mehrere Increments geben (z.B. bei mehreren PBIs die DoD erfüllen). Das Increment MUSS nutzbar sein – aber nicht zwingend deployed. Mehrere Increments können im Sprint Review präsentiert werden. Das Increment ist die Summe aller Done-Arbeit – nicht nur aus dem aktuellen Sprint.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "Multiple Increments may be created within a Sprint. The sum of the Increments is presented at the Sprint Review thus supporting empiricism."'
+  },
+  {
+    category: 'Artefakte, Increment & DoD',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Wer ist laut Scrum Guide accountable für das Erstellen eines nutzbaren Increments?',
+    options: [
+      'Der Product Owner – er ist für den Wert accountable',
+      'Der Scrum Master – er coacht das Team zur Qualität',
+      'Die Developers',
+      'Das gesamte Scrum Team gemeinsam'
+    ],
+    correct: [2],
+    explanation: 'Die Developers sind explizit accountable für das Erstellen eines nutzbaren Increments in jedem Sprint. Der Product Owner ist für den Wert accountable, das gesamte Scrum Team für die Qualitätsziele – aber die Erstellung des nutzbaren Increments ist Accountability der Developers.',
+    scrumRef: 'Scrum Guide 2020 – Developers: "Developers are always accountable for: Creating a plan for the Sprint, the Sprint Backlog; Instilling quality by adhering to a Definition of Done; Adapting their plan each day toward the Sprint Goal; Holding each other accountable as professionals."'
+  },
+  {
+    category: 'Artefakte, Increment & DoD',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Unternehmen hat keine organisationsweite Definition of Done. Wer erstellt die DoD?',
+    options: [
+      'Der Scrum Master – er ist für Qualität verantwortlich',
+      'Der Product Owner – er definiert Akzeptanzkriterien',
+      'Das Scrum Team muss selbst eine geeignete DoD erstellen',
+      'Die DoD wird im ersten Sprint Review vom Stakeholder-Feedback abgeleitet'
+    ],
+    correct: [2],
+    explanation: 'Wenn keine organisationsweite DoD existiert, muss das Scrum Team eine passende DoD für das Produkt erstellen. Das ist keine alleinige Aufgabe des SM oder PO – das Scrum Team trägt gemeinsam diese Verantwortung.',
+    scrumRef: 'Scrum Guide 2020 – Commitment: Definition of Done: "If the Definition of Done for an increment is not an organizational standard, the Scrum Team must create a Definition of Done appropriate for the product."'
+  },
+
+  // ══════ BLOCK 6: SCRUM MASTER & SERVANT LEADERSHIP ══════
+  {
+    category: 'Scrum Master & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche der folgenden Verhaltensweisen beschreibt den Scrum Master als "true leader" laut Scrum Guide am besten?',
+    options: [
+      'Er trifft Entscheidungen für das Team um es effizienter zu machen',
+      'Er schützt das Team vor allen externen Anfragen und Kontakten',
+      'Er dient dem Team und der Organisation durch Coaching, Facilitation und Impediment-Beseitigung',
+      'Er berichtet dem Management wöchentlich über den Fortschritt des Teams'
+    ],
+    correct: [2],
+    explanation: 'Der Scrum Guide beschreibt den Scrum Master als "true leader who serves the Scrum Team and the larger organization." Servant Leadership bedeutet: coachen, facilitieren, Impediments beseitigen – nicht Entscheidungen treffen, abschirmen oder berichten.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "The Scrum Master is a true leader who serves the Scrum Team and the larger organization."'
+  },
+  {
+    category: 'Scrum Master & Servant Leadership',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Wege dient der Scrum Master laut Scrum Guide der Organisation? (Wähle 3)',
+    options: [
+      'Er führt und coacht die Organisation bei der Scrum-Adoption',
+      'Er plant und berät bei Scrum-Implementierungen in der Organisation',
+      'Er erstellt Projektpläne für die Stakeholder',
+      'Er hilft dabei, empirisches Prozessdenken in der Organisation zu verstehen und einzusetzen',
+      'Er beseitigt Hindernisse zwischen Stakeholdern und Scrum Teams'
+    ],
+    correct: [0, 1, 3],
+    explanation: 'Der Scrum Master dient der Organisation durch: Führung/Coaching bei Scrum-Adoption, Planung/Beratung bei Implementierungen, und Förderung von empirischem Prozessdenken. Er erstellt keine Projektpläne und ist nicht primär zuständig für Stakeholder-Impediments (das ist eher indirekt).',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "The Scrum Master serves the organization in several ways, including: Leading, training, and coaching the organization in its Scrum adoption... Planning and advising Scrum implementations... Helping employees and stakeholders understand and enact an empirical approach..."'
+  },
+  {
+    category: 'Scrum Master & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Scrum Master stellt fest, dass zwei Developers einen ernsthaften Konflikt haben der die Sprintarbeit blockiert. Was sollte der Scrum Master primär tun?',
+    options: [
+      'Den Konflikt an den Product Owner eskalieren – dieser ist für das Team accountable',
+      'Einen der Developers bitten das Team zu verlassen',
+      'Das Impediment adressieren und dem Team helfen den Konflikt zu lösen – ggf. durch Coaching und Facilitation',
+      'Das Thema im nächsten Sprint Planning ansprechen'
+    ],
+    correct: [2],
+    explanation: 'Konflikte im Team sind Impediments die den Fortschritt blockieren. Der Scrum Master ist accountable für deren Beseitigung – durch Coaching, Facilitation und wenn nötig durch Eskalation an die Organisation. Der PO ist nicht für Team-Dynamik accountable. Das Thema sofort angehen, nicht auf das nächste Event warten.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "causing the removal of impediments to the Scrum Team\'s progress"'
+  },
+  {
+    category: 'Scrum Master & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Der Scrum Master ist gleichzeitig ein Developer im selben Scrum Team. Was sagt der Scrum Guide dazu?',
+    options: [
+      'Das ist verboten – der Scrum Master darf keine anderen Rollen übernehmen',
+      'Das ist erlaubt, aber es wird davon abgeraten da es zu Interessenkonflikten führen kann',
+      'Das ist unproblematisch – Scrum schreibt keine Vollzeit-Rollen vor',
+      'Das muss vom Product Owner genehmigt werden'
+    ],
+    correct: [1],
+    explanation: 'Der Scrum Guide erlaubt es, dass der Scrum Master auch als Developer arbeitet – rät aber davon ab, da es zu einem Fokus- und Rollenproblem führen kann. Als Scrum Master soll er das Team coachen, als Developer soll er liefern. Das kann in der Praxis zu Konflikten führen.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "The Scrum Master may also be a Developer, although this is not recommended."'
+  },
+
+  // ══════ BLOCK 7: SCRUM VALUES & SZENARIEN ══════
+  {
+    category: 'Scrum Values & Szenarien',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Developer hält es für unmöglich, das Sprint Goal in der verbleibenden Zeit zu erreichen. Er sagt nichts, damit das Team nicht demoralisiert wird. Welcher Scrum Value wird verletzt?',
+    options: [
+      'Commitment – er hält sein Versprechen nicht',
+      'Openness – er ist nicht offen über den tatsächlichen Stand der Dinge',
+      'Focus – er konzentriert sich auf das falsche Ziel',
+      'Respect – er respektiert das Team nicht genug um ehrlich zu sein'
+    ],
+    correct: [1],
+    explanation: 'Openness (Offenheit) wird verletzt – Scrum verlangt Transparenz über Arbeit und Herausforderungen. "Nichts sagen um das Team zu schützen" ist das Gegenteil von Offenheit. Das Team kann nur dann anpassen wenn es die echte Situation kennt. Courage wäre nötig um die schlechte Nachricht zu kommunizieren.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Values: "The Scrum Team and its stakeholders are open about the work and the challenges."'
+  },
+  {
+    category: 'Scrum Values & Szenarien',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Welche zwei Aussagen über Scrum Values sind laut Scrum Guide korrekt? (Wähle 2)',
+    options: [
+      'Die fünf Scrum Values müssen explizit in jedem Sprint Planning besprochen werden',
+      'Wenn die Scrum Values verkörpert werden, entstehen Vertrauen und die drei Säulen der Empirie',
+      'Scrum Values sind eine Ergänzung zu Scrum – ohne sie funktioniert Scrum trotzdem',
+      'Das Vertrauen das durch gelebte Scrum Values entsteht ist die Grundlage für effektives Scrum'
+    ],
+    correct: [1, 3],
+    explanation: 'Scrum Values sind keine optionale Ergänzung – sie sind fundamental. Wenn sie gelebt werden, entstehen Vertrauen und die drei Säulen (Transparenz, Inspektion, Anpassung). Vertrauen ist das Ergebnis gelebter Werte. Die Values müssen nicht formal besprochen werden – sie sollen gelebt werden.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Values: "Successful use of Scrum depends on people becoming more proficient in living these five values... The Scrum Team members have courage to do the right thing, to work on tough problems. They are committed... They focus... They are open... They respect..."'
+  },
+  {
+    category: 'Scrum Values & Szenarien',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Stakeholder eskaliert direkt an die Developers und fordert eine dringende Änderung am Produkt – ohne den Product Owner einzubeziehen. Was ist die korrekte Reaktion des Scrum Teams?',
+    options: [
+      'Die Developers nehmen die Anfrage an – Kundenwünsche haben höchste Priorität',
+      'Der Scrum Master entscheidet ob die Änderung umgesetzt wird',
+      'Die Developers leiten die Anfrage an den Product Owner weiter – er ist accountable für den Product Backlog',
+      'Das Team bespricht die Anfrage im nächsten Sprint Review'
+    ],
+    correct: [2],
+    explanation: 'Alle produktbezogenen Anfragen müssen über den Product Owner laufen. Er ist accountable für den Product Backlog und entscheidet über Prioritäten. Developers die direkt Anfragen annehmen untergraben die PO-Rolle und beschädigen die Transparenz des Product Backlogs.',
+    scrumRef: 'Scrum Guide 2020 – The Product Owner: "The Product Owner is accountable for maximizing the value of the product... The Product Owner is one person, not a committee... No one is allowed to instruct the Developers to work from a different set of requirements."'
+  },
+  {
+    category: 'Scrum Values & Szenarien',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Scrum Team liefert am Ende des Sprints kein nutzbares Increment. Welche zwei Aussagen beschreiben mögliche laut Scrum Guide konforme Reaktionen? (Wähle 2)',
+    options: [
+      'Der Scrum Master dokumentiert das Versagen und meldet es dem Management',
+      'Das Team analysiert in der Sprint Retrospektive was verbessert werden kann',
+      'Der Product Owner gibt dem Team einen neuen, einfacheren Sprint vor',
+      'Das Team prüft ob die DoD vorhanden und klar ist und passt ggf. seinen Prozess an'
+    ],
+    correct: [1, 3],
+    explanation: 'Die Sprint Retrospektive ist genau das richtige Event um zu analysieren was verbessert werden kann. Das Fehlen eines nutzbaren Increments deutet oft auf Probleme mit der DoD oder dem Prozess hin. Der SM meldet kein "Versagen" – er coacht. Der PO "gibt keinen Sprint vor" – das ist gegen Selbstmanagement.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Retrospective: "The purpose of the Sprint Retrospective is to plan ways to increase quality and effectiveness."'
+  }
+
+];
+
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let totalPoints = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  totalPoints = shuffledQuestions.length;
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const isMulti = q.type === 'multi';
+  const letters = ['A','B','C','D','E','F'];
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${isMulti ? '☐' : letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const multiBadge = isMulti
+    ? `<div class="multi-badge">✦ MEHRERE ANTWORTEN – Bitte ${q.correct.length} auswählen</div>`
+    : '';
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty} · ${isMulti ? 'Multiple Choice' : 'Single Choice'}</div>
+          ${multiBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  const q = shuffledQuestions[currentQuestion];
+  const isMulti = q.type === 'multi';
+  const option = document.querySelector(`.option[data-index="${idx}"]`);
+
+  if (!isMulti) {
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.option-marker').textContent = ['A','B','C','D','E','F'][parseInt(o.dataset.index)];
+    });
+    selectedOptions.clear();
+    selectedOptions.add(idx);
+    option.classList.add('selected');
+    option.querySelector('.option-marker').textContent = '✓';
+  } else {
+    if (selectedOptions.has(idx)) {
+      selectedOptions.delete(idx);
+      option.classList.remove('selected');
+      option.querySelector('.option-marker').textContent = '☐';
+    } else {
+      selectedOptions.add(idx);
+      option.classList.add('selected');
+      option.querySelector('.option-marker').textContent = '☑';
+    }
+  }
+  document.getElementById('check-btn').disabled = selectedOptions.size === 0;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions).sort();
+  const correctArr = [...correctSet].sort();
+
+  const isFullyCorrect = selectedArr.length === correctArr.length &&
+    selectedArr.every(i => correctSet.has(i));
+
+  if (isFullyCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isFullyCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isFullyCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isFullyCorrect ? '✅ Richtig!' : '❌ Leider nicht vollständig korrekt'}
+    </div>
+    ${!isFullyCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort(en): ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref"><strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isFullyCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isFullyCorrect) {
+    const correctTexts = q.correct.map(i => q.options[i]).join(' / ');
+    wrongAnswers.push({
+      frage: q.text.substring(0, 90) + (q.text.length > 90 ? '...' : ''),
+      kategorie: q.category,
+      typ: q.type === 'multi' ? 'Multiple Choice' : 'Single Choice',
+      erklaerung: q.explanation,
+      richtigeAntwort: correctTexts
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT
+// ─────────────────────────────────────────────
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '<p style="color:#10B981;font-size:15px;font-weight:700;margin:0;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) => `
+      <div style="background:#1e2433;border-left:4px solid #C703FF;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:#C703FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${i+1}. ${w.kategorie} · ${w.typ}
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">❓ ${w.frage}</div>
+        <div style="background:#0d3320;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <span style="color:#10B981;font-weight:700;">✅ Richtige Antwort(en):</span>
+          <span style="color:#d1fae5;font-size:12px;"> ${w.richtigeAntwort}</span>
+        </div>
+        <div style="color:#9AA4B2;font-size:12px;line-height:1.7;">💡 ${w.erklaerung}</div>
+      </div>
+    `).join('');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    score: score, total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails,
+    quiz: 'SCR1-Quiz-6'
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85)      { emoji='🏆'; title='Ausgezeichnet!';   sub='PSM-I-Niveau sicher erreicht – Prüfung angehen!';            color='#10B981'; }
+  else if (percent >= 70) { emoji='👍'; title='Sehr gut!';        sub='Starkes Fundament – Sprint-Logik und Events nochmals vertiefen.'; color='#7C3AED'; }
+  else if (percent >= 55) { emoji='📚'; title='Weiter üben!';     sub='Gute Basis – Advanced-Themen noch einmal durcharbeiten.';     color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!';  sub='Scrum Guide Abschnitte zu Sprint, Events & Artifacts lesen.';  color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 PSM-I-Prüfungshinweis:</strong> Diese 30 Fragen sind auf echtem PSM-I-Niveau: Szenario-basiert, mit falschen Antworten die verlockend klingen, und Guide-Formulierungen die du kennen musst. Lies jede Frage genau – ein Wort kann den Unterschied machen. Ziel: <strong>85% = 26/30 Punkte</strong>.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQuestion = 0; score = 0; selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
