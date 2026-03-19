@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCR1 – Quiz 7 | Organisationsdruck, Anti-Pattern & PSM I</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #1e0a3c 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(22px,4vw,36px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    .progress-container { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; position:sticky; top:0; z-index:100; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:56px; margin-bottom:16px; }
+    .intro-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .multi-info { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1)); border:1px solid rgba(124,58,237,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .multi-info strong { color:var(--primary-light); }
+    .multi-info p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .q-difficulty { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+    .multi-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.4); border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); margin-top:8px; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#2a1a4a; }
+    .option.selected { border-color:var(--primary); background:rgba(124,58,237,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .scrum-guide-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .psm-hint { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 18px; }
+      .option { padding: 11px 12px; font-size: 13px; }
+      .q-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">PSM I · Zertifizierungsvorbereitung</div>
+    <h1>SCR1 Quiz 7 – Organisationsdruck & Anti-Pattern</h1>
+    <p>Freitags-Quiz: Systemdenken, Commitment-Logik & PSM I Prüfungsvorbereitung</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 20 Fragen</div>
+      <div class="meta-chip">⏱ ~25 Minuten</div>
+      <div class="meta-chip">🏢 Organisationsdruck & Anti-Pattern</div>
+      <div class="meta-chip">✅ Single & Multiple Choice</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container" style="display:none;">
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 20</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🏢</div>
+    <h2 class="intro-title">Quiz 7: Organisationsdruck & Anti-Pattern</h2>
+    <p class="intro-sub">Die Themen des heutigen Kurstags: Organisationseingriffe, klassische Anti-Pattern, Commitment vs. Forecast, Sprint Goal Logik und Prüfungsszenarien auf PSM-I-Niveau.</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">20</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">13</div><div class="info-label">Single Choice</div></div>
+      <div class="info-card"><div class="info-num">7</div><div class="info-label">Multiple Choice</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Ziel PSM I</div></div>
+    </div>
+
+    <div class="multi-info">
+      <strong>ℹ️ Wichtiger Hinweis zu Mehrfachauswahl-Fragen</strong>
+      <p>Bei Fragen mit dem Badge <strong style="color:var(--accent)">MEHRERE ANTWORTEN</strong> musst du <strong>alle richtigen Antworten</strong> auswählen. Die Frage zeigt dir wie viele Antworten erwartet werden. Nur wenn du alle richtigen und keine falschen ausgewählt hast, gibt es den vollen Punkt.</p>
+    </div>
+
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung per E-Mail und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+
+  // ══════ BLOCK 1: ORGANISATIONSDRUCK & FORECAST VS. COMMITMENT ══════
+  {
+    category: 'Organisationsdruck & Forecast',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Die Geschäftsführung fordert vom Scrum Team eine verbindliche Zusage: alle genannten Features müssen in 6 Wochen live sein. Was ist die korrekte Reaktion des Scrum Masters?',
+    options: [
+      'Er akzeptiert die Anforderung – Kundentermine haben Vorrang vor Scrum-Prinzipien',
+      'Er erklärt den Unterschied zwischen Forecast und Commitment: Ein Termin ist möglich, der Scope bleibt variabel und wird empirisch gesteuert',
+      'Er lehnt den Termin komplett ab – Scrum kennt keine festen Termine',
+      'Er delegiert die Entscheidung an den Product Owner'
+    ],
+    correct: [1],
+    explanation: 'Scrum schreibt keine festen Termine vor – aber es verbietet sie auch nicht. Der SM erklärt: Ein Termin (Time-Box) ist möglich, der genaue Scope ergibt sich inkrementell. "Verbindlicher Scope + fester Termin" widerspricht Empirie. Das Sprint Goal ist ein Commitment, ein Feature-Versprechen für 6 Wochen ist ein Forecast – kein Commitment.',
+    scrumRef: 'Scrum Guide 2020 – Empiricism: Entscheidungen basieren auf dem was beobachtet wird. Forecasts sind keine Commitments.'
+  },
+  {
+    category: 'Organisationsdruck & Forecast',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Manager fordert das Scrum Team auf, sich auf einen vollständigen Feature-Umfang für die nächsten drei Sprints zu verpflichten. Welche empirische Säule wird dadurch primär geschwächt?',
+    options: [
+      'Transparenz – weil der Backlog nicht sichtbar ist',
+      'Anpassung – weil das Team nicht mehr auf neue Erkenntnisse reagieren kann',
+      'Inspektion – weil kein Review stattfindet',
+      'Selbstmanagement – weil der Manager Aufgaben verteilt'
+    ],
+    correct: [1],
+    explanation: 'Wenn der Scope für drei Sprints festgeschrieben ist, kann das Team nicht mehr auf neue Erkenntnisse, Feedback oder veränderte Prioritäten reagieren. Die Anpassung – die dritte Säule der Empirie – wird direkt untergraben. Der Wert von Sprint Reviews und Retrospektiven wird auf null reduziert.',
+    scrumRef: 'Scrum Guide 2020 – The Three Pillars: "Adaptation: If any aspects of a process deviate outside acceptable limits... the process must be adjusted as soon as possible."'
+  },
+  {
+    category: 'Organisationsdruck & Forecast',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Systemfolgen entstehen wahrscheinlich, wenn Teams ihre Velocity auf Managementvorgabe steigern müssen? (Wähle 3)',
+    options: [
+      'Die Qualität sinkt weil die Definition of Done aufgeweicht wird',
+      'Das Team liefert schneller weil Druck die Produktivität steigert',
+      'Story Points werden aufgebläht um die Velocity-Zahl zu erhöhen',
+      'Das Sprint Goal verliert seinen Sinn weil Quantität vor Wert geht',
+      'Der Product Owner übernimmt mehr Verantwortung'
+    ],
+    correct: [0, 2, 3],
+    explanation: 'Velocity-Druck führt zu klassischen Anti-Pattern: DoD wird aufgeweicht (Qualität sinkt), Story Points werden manipuliert ("aufgeblasen") um Kennzahlen zu erfüllen, und das Sprint Goal verliert seinen Fokus. Äußerer Druck steigert nicht automatisch Produktivität – er zerstört meist Vertrauen und Empirie.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Values: Velocity ist kein Scrum-Konzept. Qualität darf im Sprint nicht sinken.'
+  },
+  {
+    category: 'Organisationsdruck & Forecast',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: true,
+    text: '⚠️ TRICKY: Controlling vergleicht die Velocity aller Scrum Teams und erklärt Teams mit niedriger Velocity für "underperformant". Was ist daran grundsätzlich falsch?',
+    options: [
+      'Velocity darf nur intern vom Scrum Master gemessen werden',
+      'Velocity ist keine Scrum-Metrik und nicht teamübergreifend vergleichbar – Story Points sind relativ und teamspezifisch',
+      'Das Controlling hat keine Berechtigung Scrum Teams zu bewerten',
+      'Velocity-Vergleiche sind nur bei gleicher Sprint-Länge erlaubt'
+    ],
+    correct: [1],
+    explanation: 'Velocity und Story Points stehen nicht im Scrum Guide. Story Points sind eine relative, teamspezifische Schätzeinheit – ein Team mit 50 Points liefert nicht mehr als eines mit 20. Teamübergreifende Velocity-Vergleiche sind inhaltlich bedeutungslos und fördern Manipulation statt Transparenz.',
+    scrumRef: 'Scrum Guide 2020 – Velocity und Story Points: nicht im Guide. Scrum Guide warnt vor Metriken die Empirie untergraben.'
+  },
+  {
+    category: 'Organisationsdruck & Forecast',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Bereichsleiter verteilt im Sprint Planning direkt Aufgaben an einzelne Developers. Was ist das primär verletzte Scrum-Element?',
+    options: [
+      'Das Sprint Goal – weil der Fokus verloren geht',
+      'Das Selbstmanagement der Developers – sie entscheiden intern wer was macht',
+      'Die Timebox des Sprint Plannings – weil es länger dauert',
+      'Die Accountability des Product Owners – er verliert Einfluss'
+    ],
+    correct: [1],
+    explanation: 'Developers sind selbstmanagend: Sie entscheiden intern, wer was, wann und wie macht. Niemand – weder Manager, Scrum Master noch Product Owner – darf ihnen Aufgaben zuweisen. Externe Aufgabenverteilung untergraben Selbstmanagement und Eigenverantwortung direkt.',
+    scrumRef: 'Scrum Guide 2020 – Developers: "They are self-managing, meaning they internally decide who does what, when, and how."'
+  },
+
+  // ══════ BLOCK 2: SPRINT GOAL & SPRINT-INTEGRITÄT ══════
+  {
+    category: 'Sprint Goal & Sprint-Integrität',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Der Product Owner ändert das Sprint Goal stillschweigend nach Tag 3, weil ein Stakeholder neue Prioritäten kommuniziert hat. Was ist die korrekte Einschätzung?',
+    options: [
+      'Das ist erlaubt – der PO ist für den Wert verantwortlich und kann jederzeit reagieren',
+      'Das ist ein schwerwiegendes Anti-Pattern: Das Sprint Goal darf nicht geändert werden; wenn es obsolet ist, muss der PO den Sprint abbrechen',
+      'Das ist erlaubt wenn das Scrum Team zustimmt',
+      'Das ist erlaubt wenn die Änderung vor dem Daily Scrum kommuniziert wird'
+    ],
+    correct: [1],
+    explanation: 'Das Sprint Goal ist ein Commitment – es darf während des Sprints NICHT geändert werden. Wenn es wirklich obsolet wird (z.B. durch fundamentalen Strategiewechsel), ist der einzig korrekte Weg: Sprint abbrechen und neu planen. Stilles Ändern untergräbt Transparenz und Vertrauen im Team.',
+    scrumRef: 'Scrum Guide 2020 – The Sprint: "No changes are made that would endanger the Sprint Goal." Und: "Only the Product Owner has the authority to cancel the Sprint."'
+  },
+  {
+    category: 'Sprint Goal & Sprint-Integrität',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Was darf laut Scrum Guide während eines laufenden Sprints NICHT verändert werden? (Wähle 2)',
+    options: [
+      'Der Scope des Sprint Backlogs – er kann mit dem PO neu verhandelt werden',
+      'Das Sprint Goal – es darf nicht gefährdet werden',
+      'Die Qualitätsstandards (Definition of Done) – sie dürfen nicht gesenkt werden',
+      'Die Zusammensetzung des Scrum Teams'
+    ],
+    correct: [1, 2],
+    explanation: 'Laut Scrum Guide gilt im Sprint: Das Sprint Goal darf nicht gefährdet werden, Qualitätsstandards dürfen nicht gesenkt werden. Der Scope KANN mit dem PO neu verhandelt werden – das ist explizit erlaubt. Die Teamzusammensetzung steht nicht als explizite Unveränderlichkeit im Sprint-Abschnitt.',
+    scrumRef: 'Scrum Guide 2020 – The Sprint: "No changes are made that would endanger the Sprint Goal; Quality does not decrease; Scope may be clarified and renegotiated with the Product Owner."'
+  },
+  {
+    category: 'Sprint Goal & Sprint-Integrität',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Was ist der Unterschied zwischen einem Forecast und einem Commitment in Scrum?',
+    options: [
+      'Ein Forecast ist bindend, ein Commitment ist optional',
+      'Ein Commitment ist eine verbindliche Zusage (z.B. Sprint Goal, DoD), ein Forecast ist eine Vorhersage basierend auf aktuellem Wissen – kein Versprechen',
+      'Beide Begriffe bedeuten dasselbe in Scrum',
+      'Commitments werden vom Product Owner gemacht, Forecasts vom Scrum Team'
+    ],
+    correct: [1],
+    explanation: 'Commitments in Scrum sind formal: Product Goal, Sprint Goal, Definition of Done. Sie sind verbindlich für das Scrum Team. Forecasts hingegen sind Vorhersagen basierend auf aktuellem Wissen – z.B. "wir glauben wir können diese 5 PBIs in diesem Sprint fertigstellen." Ein Forecast ist kein Versprechen.',
+    scrumRef: 'Scrum Guide 2020 – Artefakte mit Commitments: Product Backlog → Product Goal, Sprint Backlog → Sprint Goal, Increment → Definition of Done.'
+  },
+
+  // ══════ BLOCK 3: ANTI-PATTERN ERKENNEN ══════
+  {
+    category: 'Anti-Pattern erkennen',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Das Team präsentiert im Sprint Review drei PBIs, von denen zwei die Definition of Done vollständig erfüllen und eines noch offene Tests hat. Was sollte passieren?',
+    options: [
+      'Alle drei werden präsentiert – der PO entscheidet was akzeptiert wird',
+      'Nur die zwei Done-PBIs werden präsentiert; das dritte kehrt in den Product Backlog zurück',
+      'Das dritte PBI wird als "fast fertig" gekennzeichnet und im nächsten Sprint abgeschlossen',
+      'Das Team erklärt die offenen Tests und bittet um Verlängerung der DoD'
+    ],
+    correct: [1],
+    explanation: 'Nur Arbeit die die Definition of Done erfüllt ist Teil des Increments und darf im Sprint Review gezeigt werden. "Fast fertig" gibt es in Scrum nicht. Das nicht-Done PBI kehrt in den Product Backlog zurück – der PO entscheidet über Repriorisierung. Es gibt keine formale "Abnahme" durch den PO.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review."'
+  },
+  {
+    category: 'Anti-Pattern erkennen',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Stakeholder erklärt im Sprint Review: "Ich nehme das Increment nur ab wenn alle Features exakt meinen Vorstellungen entsprechen." Was ist das Anti-Pattern und die korrekte Reaktion?',
+    options: [
+      'Das ist korrekt – Stakeholder haben das letzte Wort bei Produktentscheidungen',
+      'Das ist ein Anti-Pattern: Sprint Review ist keine Abnahme. Ziel ist Inspektion und Anpassung des Product Backlogs – nicht formale Genehmigung',
+      'Das ist erlaubt wenn der Stakeholder der Hauptauftraggeber ist',
+      'Der Scrum Master entscheidet ob die Abnahme akzeptiert wird'
+    ],
+    correct: [1],
+    explanation: 'Das Sprint Review ist kein Abnahme-Meeting. Es ist ein kollaboratives Event zur Inspektion des Inkrements und Anpassung des Product Backlogs. Formale Abnahmen durch Stakeholder existieren in Scrum nicht. Der Product Owner entscheidet über Releases – nicht Stakeholder durch "Unterschrift".',
+    scrumRef: 'Scrum Guide 2020 – Sprint Review: "The purpose of the Sprint Review is to inspect the outcome of the Sprint and determine future adaptations."'
+  },
+  {
+    category: 'Anti-Pattern erkennen',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Verhaltensweisen im Daily Scrum beschreiben Anti-Pattern laut Scrum Guide? (Wähle 3)',
+    options: [
+      'Developers berichten reihum an den Scrum Master was sie gestern gemacht haben',
+      'Der Scrum Master verteilt Aufgaben für den Tag',
+      'Das Team inspiziert den Fortschritt in Richtung Sprint Goal',
+      'Der Scrum Master moderiert aktiv und stellt die drei klassischen Fragen',
+      'Developers sprechen über Hindernisse die das Sprint Goal gefährden'
+    ],
+    correct: [0, 1, 3],
+    explanation: 'Anti-Pattern im Daily: (1) Statusbericht AN den SM – Daily ist für Developers, nicht für den SM. (2) SM verteilt Aufgaben – Selbstmanagement-Verletzung. (3) Die drei klassischen Fragen stehen nicht im Scrum Guide 2020 – sie wurden bewusst entfernt. Das Daily soll offen und selbstorganisiert sein.',
+    scrumRef: 'Scrum Guide 2020 – Daily Scrum: "The Daily Scrum is a 15-minute event for the Developers... The Developers can select whatever structure and techniques they want."'
+  },
+  {
+    category: 'Anti-Pattern erkennen',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: true,
+    text: '⚠️ TRICKY: Das Scrum Team beschließt, die Sprint Retrospektive zu überspringen weil der Sprint sehr gut gelaufen ist und es nichts zu verbessern gibt. Was ist daran falsch?',
+    options: [
+      'Nichts – das Team entscheidet selbst ob Events stattfinden',
+      'Die Retrospektive ist ein formales, verpflichtendes Event – sie dient kontinuierlicher Verbesserung, nicht nur der Problemlösung',
+      'Nur der Scrum Master darf ein Event absagen',
+      'Der Product Owner muss zustimmen wenn Events wegfallen'
+    ],
+    correct: [1],
+    explanation: 'Alle Scrum Events sind verpflichtend. "Kein Problem" ist kein Grund die Retrospektive zu streichen. Ihr Zweck ist kontinuierliche Verbesserung von Qualität und Effektivität – auch wenn alles gut läuft, gibt es immer Möglichkeiten zu wachsen. Selbstmanagement bedeutet nicht Events abzusagen.',
+    scrumRef: 'Scrum Guide 2020 – Sprint Retrospective: "The purpose of the Sprint Retrospective is to plan ways to increase quality and effectiveness."'
+  },
+
+  // ══════ BLOCK 4: ACCOUNTABILITY & SERVANT LEADERSHIP ══════
+  {
+    category: 'Accountability & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Ein Manager fragt den Scrum Master: "Wer ist für das Scheitern des letzten Sprints verantwortlich?" – Das Sprint Goal wurde nicht erreicht. Was antwortet ein guter Scrum Master?',
+    options: [
+      'Die Developers – sie haben die Arbeit nicht rechtzeitig fertiggestellt',
+      'Der Product Owner – er hat zu viele PBIs eingeplant',
+      'Das Scrum Team arbeitet gemeinsam an Verbesserungen – Scrum kennt keine Einzelschuld; die Retrospektive ist der Ort für Analyse',
+      'Der Scrum Master selbst – er hat den Prozess nicht gut genug geführt'
+    ],
+    correct: [2],
+    explanation: 'Scrum kennt keine Einzelschuld. Das Scrum Team ist eine Einheit und trägt gemeinsam Verantwortung. "Scheitern" im Sinne von nicht erreichtem Sprint Goal ist ein Signal für Inspektion und Anpassung – nicht für Schuldzuweisung. Der SM schützt das Team und lenkt auf Systemverbesserung.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Team: accountable together. Sprint Retrospective: Ort für Verbesserung, nicht Schuld.'
+  },
+  {
+    category: 'Accountability & Servant Leadership',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche zwei Accountabilities hat der Scrum Master gegenüber der Organisation laut Scrum Guide? (Wähle 2)',
+    options: [
+      'Er plant und berät bei Scrum-Implementierungen in der Organisation',
+      'Er genehmigt alle Produktentscheidungen des Product Owners',
+      'Er führt und coacht die Organisation bei der Scrum-Adoption',
+      'Er erstellt monatliche Fortschrittsberichte für das Management'
+    ],
+    correct: [0, 2],
+    explanation: 'Der SM dient der Organisation durch Planung/Beratung bei Scrum-Implementierungen und Führung/Coaching bei der Scrum-Adoption. Er genehmigt keine PO-Entscheidungen und erstellt keine Berichte. Seine Rolle ist Servant Leadership – nicht Management-Reporting.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "Leading, training, and coaching the organization in its Scrum adoption... Planning and advising Scrum implementations within the organization."'
+  },
+  {
+    category: 'Accountability & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Ein Stakeholder umgeht den Product Owner und gibt direkt den Developers neue Prioritäten. Was sollte der Scrum Master primär tun?',
+    options: [
+      'Die neuen Prioritäten akzeptieren – Stakeholder sind wichtig für das Produkt',
+      'Den Developers verbieten mit Stakeholdern zu sprechen',
+      'Das Anti-Pattern adressieren: Stakeholder-Kommunikation läuft über den PO; die Accountability des PO für den Product Backlog muss geschützt werden',
+      'Den Stakeholder zum nächsten Sprint Review einladen'
+    ],
+    correct: [2],
+    explanation: 'Niemand darf Developers anweisen, an anderen Anforderungen als dem Sprint Backlog zu arbeiten. Der PO ist accountable für den Product Backlog – seine Rolle wird durch direkte Stakeholder-Eingriffe untergraben. Der SM schützt dieses System und erklärt der Organisation wie Scrum funktioniert.',
+    scrumRef: 'Scrum Guide 2020 – The Product Owner: "No one is allowed to instruct the Developers to work from a different set of requirements."'
+  },
+  {
+    category: 'Accountability & Servant Leadership',
+    type: 'single',
+    difficulty: '⭐⭐ Mittel',
+    tricky: false,
+    text: 'Wer ist laut Scrum Guide accountable dafür, dass das Product Backlog transparent, sichtbar und verstanden ist?',
+    options: [
+      'Der Scrum Master – er moderiert alle Backlog-Meetings',
+      'Die Developers – sie müssen die Arbeit verstehen',
+      'Der Product Owner',
+      'Das gesamte Scrum Team gemeinsam'
+    ],
+    correct: [2],
+    explanation: 'Der Product Owner ist accountable für das effektive Management des Product Backlogs – und explizit dafür, dass es transparent, sichtbar und für alle verständlich ist. Er kann diese Arbeit delegieren, bleibt aber immer verantwortlich.',
+    scrumRef: 'Scrum Guide 2020 – The Product Owner: "accountable for effective Product Backlog management, including: Ensuring that the Product Backlog is transparent, visible and understood."'
+  },
+
+  // ══════ BLOCK 5: PRÜFUNGSLOGIK & ZUSAMMENFASSUNG ══════
+  {
+    category: 'PSM I Prüfungslogik',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: In der PSM-I-Prüfung steht: "Das Team hat am Ende des Sprints 6 von 8 PBIs fertiggestellt. Was passiert mit den 2 nicht fertigen PBIs?" Was ist die beste Antwort?',
+    options: [
+      'Sie werden als "in Bearbeitung" in den nächsten Sprint übertragen',
+      'Sie werden vom Product Owner abgenommen sobald sie fertig sind',
+      'Sie kehren in den Product Backlog zurück; der PO entscheidet über Repriorisierung',
+      'Der Scrum Master dokumentiert sie als technische Schulden'
+    ],
+    correct: [2],
+    explanation: 'Nicht-Done-Arbeit wird NICHT automatisch in den nächsten Sprint übertragen. Sie kehrt in den Product Backlog zurück und der Product Owner entscheidet ob und wann sie erneut eingeplant wird. Es gibt kein "in Bearbeitung" über Sprints hinaus – und keine "Abnahme" durch den PO.',
+    scrumRef: 'Scrum Guide 2020 – Increment: Arbeit die DoD nicht erfüllt ist kein Increment und kehrt in den Product Backlog zurück.'
+  },
+  {
+    category: 'PSM I Prüfungslogik',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche drei Aussagen beschreiben die "professionelle Reaktion" eines Scrum Masters auf Organisationsdruck korrekt? (Wähle 3)',
+    options: [
+      'Wirkung erklären statt Regeln zitieren: "Das führt zu X Systemfolgen"',
+      'Scrum-Prinzipien dogmatisch verteidigen: "Das ist gegen Scrum, das geht nicht"',
+      'Empirische Alternativen anbieten: "Ein Termin ist möglich, der Scope bleibt variabel"',
+      'Das Team vor allen externen Kontakten vollständig abschirmen',
+      'Die Organisation in empirischem Denken coachen statt Konfrontation suchen'
+    ],
+    correct: [0, 2, 4],
+    explanation: 'Professioneller SM-Stil: Wirkungen erklären (nicht Regeln zitieren), empirische Alternativen anbieten, und die Organisation coachen. Dogmatismus und vollständige Abschirmung sind Fehler – Scrum lebt von der Zusammenarbeit mit der Organisation. "Kein Dogmatismus, keine Konfrontation" ist die PSM-I-Leitlinie.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master serves the organization: coaching, not policing.'
+  },
+  {
+    category: 'PSM I Prüfungslogik',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: false,
+    text: 'Welche empirische Säule wird primär geschwächt wenn ein Team "fast fertige" Arbeit im Sprint Review präsentiert, obwohl die DoD nicht erfüllt ist?',
+    options: [
+      'Anpassung – weil das Team nicht reagiert',
+      'Inspektion – weil nicht klar ist was wirklich Done ist',
+      'Transparenz – weil der tatsächliche Stand der Arbeit nicht sichtbar ist',
+      'Selbstmanagement – weil der PO eingreift'
+    ],
+    correct: [2],
+    explanation: 'Transparenz ist die Grundlage aller Empirie. Wenn "fast fertig" als "fertig" präsentiert wird, ist der tatsächliche Stand der Arbeit nicht transparent. Stakeholder und PO treffen Entscheidungen auf Basis falscher Informationen. Inspektion und Anpassung können nicht funktionieren wenn Transparenz fehlt.',
+    scrumRef: 'Scrum Guide 2020 – Transparency: "The emergent process and work must be visible to those performing the work as well as those receiving the work."'
+  },
+  {
+    category: 'PSM I Prüfungslogik',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Schwer',
+    tricky: true,
+    text: '⚠️ TRICKY: Was ist der "best possible answer"-Ansatz in der PSM-I-Prüfung, wenn mehrere Antworten teilweise korrekt klingen?',
+    options: [
+      'Die Antwort wählen die am häufigsten im Scrum Guide wortwörtlich vorkommt',
+      'Die Antwort wählen die am vollständigsten und präzisesten die Guide-Logik abbildet – nicht nur teilweise korrekt',
+      'Die längste Antwort wählen – sie enthält meist mehr korrekte Details',
+      'Die Antwort wählen die am besten zur eigenen Praxiserfahrung passt'
+    ],
+    correct: [1],
+    explanation: 'In der PSM-I gibt es oft Antworten die "teilweise" richtig sind – aber eine ist vollständig korrekt. Der "best possible answer"-Ansatz: Welche Antwort bildet die Guide-Logik am vollständigsten ab? Praxiserfahrung kann täuschen. Wortlänge ist kein Kriterium. Gesucht ist die präziseste, vollständigste Scrum-Guide-Antwort.',
+    scrumRef: 'PSM I Prüfungslogik: Scrum.org prüft Verständnis, nicht Auswendiglernen. "Best possible answer" = vollständig Guide-konform.'
+  }
+
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let totalPoints = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  totalPoints = shuffledQuestions.length;
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const isMulti = q.type === 'multi';
+  const letters = ['A','B','C','D','E','F'];
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${isMulti ? '☐' : letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const multiBadge = isMulti
+    ? `<div class="multi-badge">✦ MEHRERE ANTWORTEN – Bitte ${q.correct.length} auswählen</div>`
+    : '';
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty} · ${isMulti ? 'Multiple Choice' : 'Single Choice'}</div>
+          ${multiBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  const q = shuffledQuestions[currentQuestion];
+  const isMulti = q.type === 'multi';
+  const option = document.querySelector(`.option[data-index="${idx}"]`);
+
+  if (!isMulti) {
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.option-marker').textContent = ['A','B','C','D','E','F'][parseInt(o.dataset.index)];
+    });
+    selectedOptions.clear();
+    selectedOptions.add(idx);
+    option.classList.add('selected');
+    option.querySelector('.option-marker').textContent = '✓';
+  } else {
+    if (selectedOptions.has(idx)) {
+      selectedOptions.delete(idx);
+      option.classList.remove('selected');
+      option.querySelector('.option-marker').textContent = '☐';
+    } else {
+      selectedOptions.add(idx);
+      option.classList.add('selected');
+      option.querySelector('.option-marker').textContent = '☑';
+    }
+  }
+  document.getElementById('check-btn').disabled = selectedOptions.size === 0;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions).sort();
+  const correctArr = [...correctSet].sort();
+
+  const isFullyCorrect = selectedArr.length === correctArr.length &&
+    selectedArr.every(i => correctSet.has(i));
+
+  if (isFullyCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isFullyCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isFullyCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isFullyCorrect ? '✅ Richtig!' : '❌ Leider nicht vollständig korrekt'}
+    </div>
+    ${!isFullyCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort(en): ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref"><strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isFullyCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isFullyCorrect) {
+    const correctTexts = q.correct.map(i => q.options[i]).join(' / ');
+    wrongAnswers.push({
+      frage: q.text.substring(0, 90) + (q.text.length > 90 ? '...' : ''),
+      kategorie: q.category,
+      typ: q.type === 'multi' ? 'Multiple Choice' : 'Single Choice',
+      erklaerung: q.explanation,
+      richtigeAntwort: correctTexts
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT
+// ─────────────────────────────────────────────
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '<p style="color:#10B981;font-size:15px;font-weight:700;margin:0;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) => `
+      <div style="background:#1e2433;border-left:4px solid #C703FF;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:#C703FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${i+1}. ${w.kategorie} · ${w.typ}
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">❓ ${w.frage}</div>
+        <div style="background:#0d3320;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <span style="color:#10B981;font-weight:700;">✅ Richtige Antwort(en):</span>
+          <span style="color:#d1fae5;font-size:12px;"> ${w.richtigeAntwort}</span>
+        </div>
+        <div style="color:#9AA4B2;font-size:12px;line-height:1.7;">💡 ${w.erklaerung}</div>
+      </div>
+    `).join('');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    score: score, total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails,
+    quiz: 'SCR1-Quiz-7'
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85)      { emoji='🏆'; title='Ausgezeichnet!';   sub='PSM-I-Niveau sicher erreicht – Prüfung angehen!';            color='#10B981'; }
+  else if (percent >= 70) { emoji='👍'; title='Sehr gut!';        sub='Starkes Fundament – Sprint-Logik und Events nochmals vertiefen.'; color='#7C3AED'; }
+  else if (percent >= 55) { emoji='📚'; title='Weiter üben!';     sub='Gute Basis – Advanced-Themen noch einmal durcharbeiten.';     color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!';  sub='Scrum Guide Abschnitte zu Sprint, Events & Artifacts lesen.';  color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 PSM-I-Prüfungshinweis:</strong> Heute geübte Themen direkt als Prüfungsfragen: Velocity-Manipulation, feste Scope-Versprechen, Selbstmanagement-Verletzungen, DoD-Anti-Pattern und Sprint-Goal-Logik. Denke in Systemfolgen, nicht nur in Regelverstoß. Ziel: <strong>85% = 17/20 Punkte</strong>.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQuestion = 0; score = 0; selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
