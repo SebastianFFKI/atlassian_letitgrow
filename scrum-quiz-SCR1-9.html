@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCR1 – Quiz 9 | Language Precision & Anti-Pattern Detection</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #1e0a3c 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(22px,4vw,36px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    .progress-container { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; position:sticky; top:0; z-index:100; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:56px; margin-bottom:16px; }
+    .intro-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .multi-info { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1)); border:1px solid rgba(124,58,237,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .multi-info strong { color:var(--primary-light); }
+    .multi-info p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .q-difficulty { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+    .multi-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.4); border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); margin-top:8px; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#2a1a4a; }
+    .option.selected { border-color:var(--primary); background:rgba(124,58,237,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .scrum-guide-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .psm-hint { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 18px; }
+      .option { padding: 11px 12px; font-size: 13px; }
+      .q-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">PSM I · Zertifizierungsvorbereitung</div>
+    <h1>SCR1 Quiz 9 – Language Precision</h1>
+    <p>Word Traps · Anti-Pattern Detection · DoD · Product Goal · PSM I Level</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 20 Questions</div>
+      <div class="meta-chip">⏱ ~25 Minutes</div>
+      <div class="meta-chip">🎯 Word Precision · PSM I</div>
+      <div class="meta-chip">✅ Single & Multiple Choice</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container" style="display:none;">
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 20</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🧠</div>
+    <h2 class="intro-title">Quiz 9: Language Precision & Anti-Patterns</h2>
+    <p class="intro-sub">Today's topics as PSM I exam questions: Definition of Done, Increment integrity, Product Goal, accountability wording, and classic anti-pattern scenarios. One word can make the difference.</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">20</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">13</div><div class="info-label">Single Choice</div></div>
+      <div class="info-card"><div class="info-num">7</div><div class="info-label">Multiple Choice</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Ziel PSM I</div></div>
+    </div>
+
+    <div class="multi-info">
+      <strong>ℹ️ Multiple Answer Questions</strong>
+      <p>Questions marked <strong style="color:var(--accent)">MULTIPLE ANSWERS</strong> require you to select <strong>all correct answers</strong>. The number of expected answers is shown in the question. Only a fully correct selection earns the full point.</p>
+    </div>
+
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung per E-Mail und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+
+  // ══════ BLOCK 1: LANGUAGE PRECISION – TEAM ALPHA STATEMENTS ══════
+  {
+    category: 'Language Precision',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "The Scrum Master is responsible for ensuring the Developers deliver the work." What is wrong with this statement?',
+    options: [
+      'Nothing – the Scrum Master is responsible for team delivery',
+      'The word "responsible" should be "accountable" – the SM is accountable for delivery',
+      'The Scrum Master is not responsible for ensuring delivery – Developers are accountable for creating a usable Increment; the SM serves and enables, not delivers',
+      'The statement is only wrong because "deliver" should be "release"'
+    ],
+    correct: [2],
+    explanation: 'The Scrum Master is not accountable or responsible for delivery. Developers are accountable for creating the Increment. The Scrum Master\'s role is to serve: removing impediments, coaching, ensuring events happen. "Ensuring Developers deliver" implies managerial control, which contradicts self-management.',
+    scrumRef: 'Scrum Guide 2020 – The Scrum Master: "serves the Scrum Team." Developers: "accountable for creating a plan for the Sprint... instilling quality... Holding each other accountable as professionals."'
+  },
+  {
+    category: 'Language Precision',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "The Scrum Team commits to delivering all selected Product Backlog Items." What is the precise problem with this statement?',
+    options: [
+      'The Scrum Team cannot make any commitments in Scrum',
+      'The Scrum Team commits to the Sprint Goal, not to delivering all selected PBIs – scope may vary while the Sprint Goal is protected',
+      'Only Developers can make commitments, not the entire Scrum Team',
+      'The statement is correct – the team must deliver everything they selected'
+    ],
+    correct: [1],
+    explanation: 'This is one of the most common PSM I traps. The commitment is to the Sprint Goal – not to a list of PBIs. The Sprint Backlog\'s commitment IS the Sprint Goal. Scope (PBIs) may be renegotiated with the PO while protecting the Sprint Goal. "Commit to PBIs" is incorrect.',
+    scrumRef: 'Scrum Guide 2020 – Commitment: Sprint Goal: "The Sprint Goal is the single objective for the Sprint... it provides flexibility in terms of the exact work needed to achieve it."'
+  },
+  {
+    category: 'Language Precision',
+    type: 'single',
+    difficulty: '⭐⭐ Medium',
+    tricky: false,
+    text: '"The Scrum Master assigns work to ensure efficiency." Classify this statement.',
+    options: [
+      'Correct – the Scrum Master optimizes team efficiency by assigning work',
+      'Incorrect – the Scrum Master is a servant leader, not a manager; assigning work violates self-management',
+      'Partially correct – the SM may assign work in the first Sprint only',
+      'Correct – assigning work is part of Sprint Planning facilitation'
+    ],
+    correct: [1],
+    explanation: 'The Scrum Master never assigns work. Developers are self-managing – they internally decide who does what, when, and how. A SM who assigns work acts as a manager, undermining the self-management principle that is fundamental to Scrum.',
+    scrumRef: 'Scrum Guide 2020 – Developers: "They are self-managing, meaning they internally decide who does what, when, and how."'
+  },
+  {
+    category: 'Language Precision',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'Which two statements from today\'s exercise are CORRECT according to the Scrum Guide? (Choose 2)',
+    options: [
+      'The Sprint Goal is optional if the selected Product Backlog Items are clear',
+      'The Definition of Done ensures transparency about the state of the Increment',
+      'During the Sprint, scope may be clarified and renegotiated between the Product Owner and Developers',
+      'Quality assurance can be handled after the Sprint if time is short',
+      'The Scrum Master assigns work to ensure efficiency'
+    ],
+    correct: [1, 2],
+    explanation: 'Statement B is correct: DoD ensures transparency about Increment quality. Statement C is correct: scope MAY be renegotiated during the Sprint. The Sprint Goal is NEVER optional. Quality cannot be deferred. The SM never assigns work.',
+    scrumRef: 'Scrum Guide 2020 – DoD: "creates transparency." The Sprint: "Scope may be clarified and renegotiated with the Product Owner as more is learned."'
+  },
+
+  // ══════ BLOCK 2: DEFINITION OF DONE & INCREMENT (TEAM BETA) ══════
+  {
+    category: 'Definition of Done & Increment',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "An Increment is created at the end of the Sprint." What is subtly wrong here?',
+    options: [
+      'Nothing – Increments are always created at the end of the Sprint',
+      'An Increment is created the moment a PBI meets the Definition of Done – this can happen at any point during the Sprint, not only at the end',
+      'The statement should say "released" not "created"',
+      'Increments are only created during Sprint Review'
+    ],
+    correct: [1],
+    explanation: 'This is a classic subtle trap. The Scrum Guide says: "The moment a Product Backlog item meets the Definition of Done, an Increment is born." Multiple Increments can exist within a Sprint. An Increment is not a Sprint-end artifact – it exists throughout the Sprint as work becomes Done.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "The moment a Product Backlog item meets the Definition of Done, an Increment is born... Multiple Increments may be created within a Sprint."'
+  },
+  {
+    category: 'Definition of Done & Increment',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'The team skips documentation that is normally part of their Definition of Done to meet a release date. What is the correct assessment?',
+    options: [
+      'Acceptable – release dates take priority over process rules',
+      'Acceptable – the PO can temporarily waive DoD requirements for urgent releases',
+      'Incorrect – the Definition of Done cannot be selectively applied; skipping it means the work is not Done and cannot be released as an Increment',
+      'Acceptable only if the Scrum Master approves the exception'
+    ],
+    correct: [2],
+    explanation: 'The Definition of Done is non-negotiable. If work does not meet the DoD, it is not a Done Increment and cannot be released. Selectively skipping DoD items undermines quality and transparency. If the DoD is too strict, the team should adapt it – but never bypass it for a single release.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review."'
+  },
+  {
+    category: 'Definition of Done & Increment',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "An Increment is considered complete because stakeholders say it looks good." What is wrong?',
+    options: [
+      'Nothing – stakeholder satisfaction is the ultimate measure of Done',
+      'The Product Owner must formally accept the Increment for it to be Done',
+      'Done is defined by the Definition of Done – not by stakeholder opinion or PO acceptance',
+      'The Scrum Master must validate that stakeholder feedback is sufficient'
+    ],
+    correct: [2],
+    explanation: 'Done is determined solely by the Definition of Done – a formal description of the quality state of the Increment. Stakeholder opinions and PO acceptance are not substitutes. This is a common anti-pattern: replacing the DoD with informal social approval.',
+    scrumRef: 'Scrum Guide 2020 – DoD: "The Definition of Done is a formal description of the state of the Increment when it meets the quality measures required for the product."'
+  },
+  {
+    category: 'Definition of Done & Increment',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'Which two statements about the Definition of Done are correct according to the Scrum Guide? (Choose 2)',
+    options: [
+      'The Definition of Done may evolve as the Scrum Team learns more',
+      'The Definition of Done is primarily the responsibility of the Scrum Master',
+      'The Definition of Done creates transparency about the quality of the Increment',
+      'The Definition of Done only applies to PBIs selected for the current Sprint'
+    ],
+    correct: [0, 2],
+    explanation: 'The DoD may evolve – teams improve their definition over time. The DoD creates transparency about Increment quality. The DoD is NOT the SM\'s responsibility – if no org-wide DoD exists, the Scrum Team creates one. The DoD applies to all work, not just selected items.',
+    scrumRef: 'Scrum Guide 2020 – DoD: "creates transparency... If the Definition of Done for an increment is not an organizational standard, the Scrum Team must create a Definition of Done appropriate for the product."'
+  },
+
+  // ══════ BLOCK 3: PRODUCT GOAL & PRODUCT BACKLOG (TEAM GAMMA) ══════
+  {
+    category: 'Product Goal & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "The Product Goal must be achieved within a single Sprint." Classify this statement.',
+    options: [
+      'Correct – each Sprint must fully deliver the Product Goal',
+      'Incorrect – the Product Goal is a long-term objective; multiple Sprints work toward it',
+      'Partially correct – the Product Goal spans multiple Sprints but should be achievable within a quarter',
+      'Correct – if the Goal cannot be done in one Sprint, it must be broken down'
+    ],
+    correct: [1],
+    explanation: 'The Product Goal is a long-term objective that the Scrum Team works toward over multiple Sprints. The Scrum Guide describes it as "the long-term objective for the Scrum Team." A Sprint Goal is the single-Sprint commitment – not the Product Goal.',
+    scrumRef: 'Scrum Guide 2020 – Product Goal: "The Product Goal describes a future state of the product which can serve as a target for the Scrum Team to plan against... The Product Goal is the long-term objective for the Scrum Team."'
+  },
+  {
+    category: 'Product Goal & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "Stakeholders may directly reorder the Product Backlog if they provide strong business justification." Is this correct?',
+    options: [
+      'Yes – stakeholder input is essential for effective prioritization',
+      'Yes – but only with the Scrum Master\'s approval',
+      'No – only the Product Owner is accountable for ordering the Product Backlog; stakeholders may provide input but cannot directly reorder it',
+      'Yes – if the majority of stakeholders agree, they can override the PO'
+    ],
+    correct: [2],
+    explanation: 'Only the Product Owner is accountable for ordering the Product Backlog. Stakeholders are important sources of input, but they cannot directly change the backlog order. If stakeholders could directly reorder, the PO\'s accountability would be undermined.',
+    scrumRef: 'Scrum Guide 2020 – Product Owner: "The Product Owner is also accountable for effective Product Backlog management, including: Ordering Product Backlog items."'
+  },
+  {
+    category: 'Product Goal & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "Multiple Product Goals may exist simultaneously within one Product Backlog." True or false?',
+    options: [
+      'True – a rich Product Backlog naturally contains multiple goals',
+      'True – the PO manages multiple goals and prioritizes between them',
+      'False – the Scrum Team must fulfill or abandon one Product Goal before taking on the next',
+      'False – only one Product Backlog item can be a "goal" at any time'
+    ],
+    correct: [2],
+    explanation: 'The Scrum Guide is explicit: "The Scrum Team must fulfill (or abandon) one objective before taking on the next." Only one Product Goal exists at a time. This creates focus and prevents the team from being pulled in multiple strategic directions simultaneously.',
+    scrumRef: 'Scrum Guide 2020 – Commitment: Product Goal: "The Scrum Team must fulfill (or abandon) one objective before taking on the next."'
+  },
+  {
+    category: 'Product Goal & Product Backlog',
+    type: 'single',
+    difficulty: '⭐⭐ Medium',
+    tricky: false,
+    text: '"Refinement is an official Scrum event." How should this statement be classified?',
+    options: [
+      'Correct – Refinement is the sixth Scrum event alongside Sprint Planning, Daily, Review, Retrospective and the Sprint',
+      'Incorrect – Refinement is not a formal Scrum event; it is an ongoing activity that occurs throughout the Sprint',
+      'Partially correct – Refinement is mandatory but not timeboxed',
+      'Correct – Refinement was added as an event in the Scrum Guide 2020'
+    ],
+    correct: [1],
+    explanation: 'Refinement is NOT a formal Scrum event. The Scrum Guide describes it as "the act of breaking down and further defining Product Backlog items... This is an ongoing activity." There are exactly 5 events in Scrum: Sprint, Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective.',
+    scrumRef: 'Scrum Guide 2020 – Product Backlog Refinement: "Product Backlog refinement is the act of breaking down and further defining Product Backlog items into smaller more precise items."'
+  },
+  {
+    category: 'Product Goal & Product Backlog',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'Which two statements about the Product Backlog are correct according to the Scrum Guide? (Choose 2)',
+    options: [
+      'The Product Backlog is complete once all known requirements are documented',
+      'The Product Owner may delegate Product Backlog management tasks but remains accountable',
+      'The Product Backlog is an ordered list of everything known to be needed in the product',
+      'Stakeholders may directly add items to the Product Backlog without involving the PO'
+    ],
+    correct: [1, 2],
+    explanation: 'The PO may delegate tasks but retains accountability. The Product Backlog is "an ordered list of everything known to be needed." The Backlog is NEVER complete – it evolves as long as the product exists. Stakeholders cannot directly modify the backlog.',
+    scrumRef: 'Scrum Guide 2020 – Product Backlog: "The Product Backlog is an emergent, ordered list of what is needed to improve the product. It is the single source of work undertaken by the Scrum Team."'
+  },
+
+  // ══════ BLOCK 4: ANTI-PATTERN SCENARIOS ══════
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'During the Sprint, management adds urgent work directly to the Developers without consulting the Product Owner. Which Scrum element is primarily violated?',
+    options: [
+      'The Sprint Goal – because additional work may delay delivery',
+      'The Product Owner\'s accountability – no one may instruct Developers to work from a different set of requirements',
+      'The Scrum Master\'s role – they should have prevented this',
+      'The Daily Scrum – because unplanned work appears without transparency'
+    ],
+    correct: [1],
+    explanation: 'The Scrum Guide explicitly states: "No one is allowed to instruct the Developers to work from a different set of requirements." All work flows through the Product Owner and Product Backlog. Management bypassing the PO directly undermines the PO\'s accountability.',
+    scrumRef: 'Scrum Guide 2020 – Product Owner: "No one is allowed to instruct the Developers to work from a different set of requirements, and the Developers are not allowed to act on what anyone else says."'
+  },
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ SCENARIO: The team demonstrates functionality in the Sprint Review that has not been integrated into the main branch yet. What is the core problem?',
+    options: [
+      'The Sprint Review should only be attended by the Scrum Team',
+      'Work that is not integrated may not meet the Definition of Done and therefore is not a valid Increment',
+      'The main branch integration is optional if stakeholders approve',
+      'Integration is only required before a production release, not for Sprint Review'
+    ],
+    correct: [1],
+    explanation: 'If integration into the main branch is part of the Definition of Done, then unintegrated work is NOT Done and cannot be presented as an Increment. This is the "almost done" anti-pattern disguised. The DoD defines Done – not stakeholder approval or release readiness.',
+    scrumRef: 'Scrum Guide 2020 – Increment: "If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review."'
+  },
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'The Product Owner changes the Sprint Goal mid-Sprint due to stakeholder pressure. Which empirical pillar is primarily weakened?',
+    options: [
+      'Transparency – because the team does not know what to work on',
+      'Inspection – because the Sprint Review cannot be prepared properly',
+      'Adaptation – because the change was not based on inspection of the actual Sprint progress',
+      'All three pillars equally'
+    ],
+    correct: [0],
+    explanation: 'When the Sprint Goal changes without a Sprint cancellation and restart, Transparency is primarily broken: the team no longer has a clear, stable objective. Stakeholders and the team cannot trust what is being worked toward. Without a transparent Sprint Goal, Inspection and Adaptation also fail – but Transparency is the root cause.',
+    scrumRef: 'Scrum Guide 2020 – The Sprint: "No changes are made that would endanger the Sprint Goal." Transparency is the foundation of the empirical pillars.'
+  },
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'The Product Owner adds items to the Product Backlog but does not order them, leaving prioritization to the Developers. What should the Scrum Master do?',
+    options: [
+      'Nothing – Developers are self-managing and can prioritize themselves',
+      'Order the backlog on behalf of the PO to keep the Sprint Planning on track',
+      'Coach the Product Owner on their accountability for ordering the Product Backlog',
+      'Ask the Developers to vote on the most valuable items'
+    ],
+    correct: [2],
+    explanation: 'Ordering the Product Backlog is an explicit accountability of the Product Owner. The Scrum Master\'s role here is to coach the PO, not to take over their work. Developers ordering the backlog or the SM doing it instead would both violate the PO\'s accountability.',
+    scrumRef: 'Scrum Guide 2020 – Product Owner: "accountable for effective Product Backlog management, including: Ordering Product Backlog items in order to best achieve goals and missions."'
+  },
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'multi',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: false,
+    text: 'Which two anti-patterns from today\'s exercises weaken the Transparency pillar of empiricism? (Choose 2)',
+    options: [
+      'The Daily Scrum becomes a status report to the Scrum Master',
+      'Partially tested work is shown in the Sprint Review as if it were Done',
+      'The Sprint Retrospective ends without actionable improvements',
+      'Testing is handled by a separate department after the Sprint'
+    ],
+    correct: [1, 3],
+    explanation: 'Both weaken Transparency: (1) Presenting not-Done work as Done hides the real state of the Increment – a direct transparency violation. (2) External testing after the Sprint means the team\'s output lacks a clear, shared quality standard – the state of quality is not transparent during the Sprint.',
+    scrumRef: 'Scrum Guide 2020 – Transparency: "The emergent process and work must be visible... Significant decisions are based on the perceived state of its three formal artifacts."'
+  },
+  {
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ FINAL TRAP: "The Scrum Team works on multiple Product Goals simultaneously to increase value delivery." Why is this a problem?',
+    options: [
+      'It is not a problem – multiple goals increase focus and velocity',
+      'It violates the Product Owner\'s accountability for value',
+      'The Scrum Guide requires one Product Goal at a time – pursuing multiple Goals simultaneously destroys focus and undermines the Sprint Goal commitment',
+      'It is only a problem if the Sprint Goal is affected'
+    ],
+    correct: [2],
+    explanation: 'One Product Goal at a time is an explicit Scrum Guide rule. Multiple simultaneous Product Goals fragment the team\'s focus, make the Sprint Goal incoherent, and undermine the entire empirical direction of the product. "Increase value delivery" is a false justification – focus creates more value, not fragmentation.',
+    scrumRef: 'Scrum Guide 2020 – Product Goal: "The Scrum Team must fulfill (or abandon) one objective before taking on the next."'
+  }
+
+  ,{
+    category: 'Anti-Pattern Scenarios',
+    type: 'single',
+    difficulty: '⭐⭐⭐ Hard',
+    tricky: true,
+    text: '⚠️ WORD TRAP: "Which two statements from today\'s exercise set are correct according to the Scrum Guide? \'The Scrum Team is collectively accountable for maintaining quality\' and \'Developers may add technical improvements to the Product Backlog.\'',
+    options: [
+      'Both are incorrect',
+      'Only the first is correct – quality is a Scrum Team accountability',
+      'Only the second is correct – Developers may add technical items',
+      'Both are correct according to the Scrum Guide'
+    ],
+    correct: [3],
+    explanation: 'Both statements are correct. (1) The Scrum Team is collectively accountable for creating a valuable, useful Increment – quality is a shared team responsibility. (2) Developers may add technical improvements, experiments or fixes to the Product Backlog – but they must be transparent and visible so the PO can order them appropriately.',
+    scrumRef: 'Scrum Guide 2020 – Scrum Team: collectively accountable. Product Backlog: "The Product Backlog lists all features, functions, requirements, enhancements, and fixes that constitute the changes to be made to the product in future releases."'
+  }
+
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let totalPoints = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  totalPoints = shuffledQuestions.length;
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const isMulti = q.type === 'multi';
+  const letters = ['A','B','C','D','E','F'];
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${isMulti ? '☐' : letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const multiBadge = isMulti
+    ? `<div class="multi-badge">✦ MEHRERE ANTWORTEN – Bitte ${q.correct.length} auswählen</div>`
+    : '';
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty} · ${isMulti ? 'Multiple Choice' : 'Single Choice'}</div>
+          ${multiBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  const q = shuffledQuestions[currentQuestion];
+  const isMulti = q.type === 'multi';
+  const option = document.querySelector(`.option[data-index="${idx}"]`);
+
+  if (!isMulti) {
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.option-marker').textContent = ['A','B','C','D','E','F'][parseInt(o.dataset.index)];
+    });
+    selectedOptions.clear();
+    selectedOptions.add(idx);
+    option.classList.add('selected');
+    option.querySelector('.option-marker').textContent = '✓';
+  } else {
+    if (selectedOptions.has(idx)) {
+      selectedOptions.delete(idx);
+      option.classList.remove('selected');
+      option.querySelector('.option-marker').textContent = '☐';
+    } else {
+      selectedOptions.add(idx);
+      option.classList.add('selected');
+      option.querySelector('.option-marker').textContent = '☑';
+    }
+  }
+  document.getElementById('check-btn').disabled = selectedOptions.size === 0;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions).sort();
+  const correctArr = [...correctSet].sort();
+
+  const isFullyCorrect = selectedArr.length === correctArr.length &&
+    selectedArr.every(i => correctSet.has(i));
+
+  if (isFullyCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isFullyCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isFullyCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isFullyCorrect ? '✅ Richtig!' : '❌ Leider nicht vollständig korrekt'}
+    </div>
+    ${!isFullyCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort(en): ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref"><strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isFullyCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isFullyCorrect) {
+    const correctTexts = q.correct.map(i => q.options[i]).join(' / ');
+    wrongAnswers.push({
+      frage: q.text.substring(0, 90) + (q.text.length > 90 ? '...' : ''),
+      kategorie: q.category,
+      typ: q.type === 'multi' ? 'Multiple Choice' : 'Single Choice',
+      erklaerung: q.explanation,
+      richtigeAntwort: correctTexts
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT
+// ─────────────────────────────────────────────
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '<p style="color:#10B981;font-size:15px;font-weight:700;margin:0;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) => `
+      <div style="background:#1e2433;border-left:4px solid #C703FF;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:#C703FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${i+1}. ${w.kategorie} · ${w.typ}
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">❓ ${w.frage}</div>
+        <div style="background:#0d3320;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <span style="color:#10B981;font-weight:700;">✅ Richtige Antwort(en):</span>
+          <span style="color:#d1fae5;font-size:12px;"> ${w.richtigeAntwort}</span>
+        </div>
+        <div style="color:#9AA4B2;font-size:12px;line-height:1.7;">💡 ${w.erklaerung}</div>
+      </div>
+    `).join('');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    score: score, total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails,
+    quiz: 'SCR1-Quiz-9'
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85)      { emoji='🏆'; title='Ausgezeichnet!';   sub='PSM-I-Niveau sicher erreicht – Prüfung angehen!';            color='#10B981'; }
+  else if (percent >= 70) { emoji='👍'; title='Sehr gut!';        sub='Starkes Fundament – Sprint-Logik und Events nochmals vertiefen.'; color='#7C3AED'; }
+  else if (percent >= 55) { emoji='📚'; title='Weiter üben!';     sub='Gute Basis – Advanced-Themen noch einmal durcharbeiten.';     color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!';  sub='Scrum Guide Abschnitte zu Sprint, Events & Artifacts lesen.';  color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 PSM I Exam Tip:</strong> These questions are built from today's exercise statements – the same wording traps you analyzed in your teams. Focus on: <em>accountable vs. responsible</em>, <em>Increment vs. Done</em>, <em>Product Goal logic</em>, and <em>what the Scrum Guide actually says</em>. Target: <strong>85% = 17/20</strong>.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQuestion = 0; score = 0; selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
