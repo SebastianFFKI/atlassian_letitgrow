@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSM I Practice Quiz – 80 Questions</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0F0A1E;
+      --card: #1A1033;
+      --card2: #231545;
+      --text: #F3F0FF;
+      --text-muted: #A89CC8;
+      --border: #3D2B6B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #1e0a3c 0%, var(--primary) 50%, var(--accent) 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(22px,4vw,36px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    .progress-container { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; position:sticky; top:0; z-index:100; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:56px; margin-bottom:16px; }
+    .intro-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .multi-info { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1)); border:1px solid rgba(124,58,237,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .multi-info strong { color:var(--primary-light); }
+    .multi-info p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .q-difficulty { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+    .multi-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.4); border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); margin-top:8px; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#2a1a4a; }
+    .option.selected { border-color:var(--primary); background:rgba(124,58,237,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .scrum-guide-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .psm-hint { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .question-card { padding: 18px; }
+      .option { padding: 11px 12px; font-size: 13px; }
+      .q-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">PSM I · Zertifizierungsvorbereitung</div>
+    <h1>PSM I Practice Quiz</h1>
+    <p>80 Questions · True/False + Single Choice + Multiple Choice · Scrum Guide 2020</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 80 Questions</div>
+      <div class="meta-chip">⏱ ~50 Minutes</div>
+      <div class="meta-chip">🎓 PSM I Prep</div>
+      <div class="meta-chip">✅ Single & Multiple Choice</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container" style="display:none;">
+  <div id="exam-timer" style="text-align:right;font-size:14px;font-weight:700;color:#A78BFA;margin-bottom:6px;padding-right:8px;">⏱ 50:00</div>
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 20</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🎓</div>
+    <h2 class="intro-title">PSM I Practice Quiz</h2>
+    <p class="intro-sub">80 questions across all Scrum topics: True/False, Single Choice and Multiple Choice. Watch for word traps: only, always, must, accountable vs. responsible. Target: 85% (68/80).</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">80</div><div class="info-label">Questions</div></div>
+      <div class="info-card"><div class="info-num">68</div><div class="info-label">Pass Score</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Required</div></div>
+      <div class="info-card"><div class="info-num">85%</div><div class="info-label">Ziel PSM I</div></div>
+    </div>
+
+    <div class="multi-info">
+      <strong>ℹ️ Multiple Answer Questions</strong>
+      <p>Questions marked <strong style="color:var(--accent)">MULTIPLE ANSWERS</strong> require ALL correct answers. The question states how many to choose. Only a fully correct selection earns the full point.</p>
+    </div>
+
+    <div class="reg-form">
+      <h3>🎓 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung per E-Mail und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Max Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Scrum Guide Referenz</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+
+// ══ BLOCK 1: SCRUM THEORY & EMPIRICISM (Q1-10) ══════════════════════
+// TF reduced, more SC with plausible distractors
+
+{ n:1, category:'Scrum Theory & Empiricism', type:'single',
+  text:'Which statement best describes the foundation of Scrum?',
+  options:['A. Scrum follows a defined process that minimizes the need for planning','B. Scrum is founded on empiricism – decisions are based on observation and experience','C. Scrum ensures predictability through detailed upfront planning','D. Scrum replaces the need for inspection by using standardized processes'],
+  correct:[1],
+  explanation:'B is the only fully correct answer. C describes waterfall. D contradicts empiricism (inspection is a pillar). A misrepresents Scrum as process-based.',
+  scrumRef:'Scrum Guide 2020 – Scrum Theory: Scrum is founded on empiricism and lean thinking.' },
+
+{ n:2, category:'Scrum Theory & Empiricism', type:'single',
+  text:'Transparency is required for effective inspection. Which statement about this relationship is correct?',
+  options:['A. Inspection can compensate for low transparency if done frequently enough','B. Transparency and inspection are independent pillars that work separately','C. Inspection without transparency is misleading and wasteful','D. Transparency only matters during Sprint Review'],
+  correct:[2],
+  explanation:'C is the exact Scrum Guide wording. Transparency enables inspection – without it, inspection leads to wrong decisions. All events create transparency, not just the Review.',
+  scrumRef:'Scrum Guide 2020: Inspection without transparency is misleading and wasteful.' },
+
+{ n:3, category:'Scrum Theory & Empiricism', type:'multi',
+  text:'Which TWO statements about empiricism in Scrum are correct? (Choose 2)',
+  options:['A. Decisions are based on what is observed and experienced','B. Inspection replaces the need for transparency','C. When deviations occur, adaptation must happen as soon as possible','D. Detailed planning eliminates the need for inspection'],
+  correct:[0,2],
+  explanation:'A and C are the two correct statements. B is wrong – inspection requires transparency, not replaces it. D contradicts empiricism entirely.',
+  scrumRef:'Scrum Guide 2020 – The Three Pillars of Empiricism' },
+
+{ n:4, category:'Scrum Theory & Empiricism', type:'single',
+  text:'What does lean thinking primarily contribute to Scrum?',
+  options:['A. More documentation to reduce risk','B. Eliminating waste and focusing on essentials','C. Strict process adherence','D. Hierarchical control over team output'],
+  correct:[1],
+  explanation:'Lean thinking reduces waste and focuses on what delivers value. It complements empiricism as the dual foundation of Scrum.',
+  scrumRef:'Scrum Guide 2020 – Scrum Theory: lean thinking reduces waste and focuses on essentials.' },
+
+{ n:5, category:'Scrum Theory & Empiricism', type:'single',
+  text:'When transparency is low within a Scrum Team, what is the most direct consequence?',
+  options:['A. The Daily Scrum becomes shorter','B. The Scrum Master must add more reporting checkpoints','C. Decisions may be based on misleading information, increasing risk','D. The Sprint Review is automatically extended'],
+  correct:[2],
+  explanation:'Low transparency leads to decisions that diminish value and increase risk. It does not trigger automatic changes to events or reporting.',
+  scrumRef:'Scrum Guide 2020: Artifacts with low transparency can lead to decisions that diminish value and increase risk.' },
+
+{ n:6, category:'Scrum Theory & Empiricism', type:'single',
+  text:'A team discovers mid-Sprint that their technical approach will not work. The Scrum Master suggests waiting for the Retrospective. The Product Owner says to continue and fix it next Sprint. What should happen?',
+  options:['A. Follow the PO – they are accountable for value and decide the path forward','B. Follow the Scrum Master – the Retrospective is the correct event for process issues','C. The team adapts their plan immediately – waiting for a later event undermines empiricism','D. Cancel the Sprint since the approach has failed'],
+  correct:[2],
+  explanation:'Adaptation must happen as soon as a deviation is recognized. The Daily Scrum exists for exactly this. Waiting weakens empiricism. Cancelling is too extreme – the Sprint Goal may still be achievable via another approach.',
+  scrumRef:'Scrum Guide 2020 – Adaptation: the process must be adjusted as soon as possible.' },
+
+{ n:7, category:'Scrum Theory & Empiricism', type:'single',
+  text:'Scrum is best described as which of the following?',
+  options:['A. A complete methodology defining every step of product development','B. A lightweight framework that helps generate value through adaptive solutions','C. A project management approach designed specifically for software teams','D. A set of rules that must be followed exactly to achieve agility'],
+  correct:[1],
+  explanation:'Framework not methodology. Not limited to software. The Guide says Scrum is purposefully incomplete – it provides structure but not prescriptions for every situation.',
+  scrumRef:'Scrum Guide 2020: Scrum is a lightweight framework... not a process or methodology.' },
+
+{ n:8, category:'Scrum Theory & Empiricism', type:'single',
+  text:'Which statement best reflects the Scrum Guide on fixed-length Sprints?',
+  options:['A. Fixed-length Sprints give management regular reporting checkpoints','B. Fixed-length Sprints ensure all planned work is completed each iteration','C. Fixed-length Sprints create consistency and a regular cadence for inspection and adaptation','D. Fixed-length Sprints reduce the overhead of re-planning'],
+  correct:[2],
+  explanation:'The purpose of fixed length is consistency and the empirical cadence – not reporting, not guaranteed completion. Replanning overhead reduction is a side effect, not the purpose.',
+  scrumRef:'Scrum Guide 2020: Sprints enable predictability by ensuring inspection and adaptation of progress.' },
+
+// Q9 CORRECTED: Choose 3 (not 4), Transparency removed, Openness added as correct option
+{ n:9, category:'Scrum Theory & Empiricism', type:'multi',
+  text:'Which THREE of the following are Scrum Values? (Choose 3)',
+  options:['A. Commitment','B. Transparency','C. Openness','D. Courage','E. Predictability'],
+  correct:[0,2,3],
+  explanation:'The five Scrum Values are: Commitment, Focus, Openness, Respect, Courage. Transparency is an empirical PILLAR, not a Value. Predictability is not in the Scrum Guide.',
+  scrumRef:'Scrum Guide 2020 – Scrum Values: Commitment, Focus, Openness, Respect, and Courage.' },
+
+{ n:10, category:'Scrum Theory & Empiricism', type:'single',
+  text:'What is the result of the Scrum Team living the five Scrum Values according to the Scrum Guide?',
+  options:['A. Higher velocity and more predictable delivery','B. The empirical pillars come to life and trust is built','C. Management gains better visibility over team performance','D. Conflicts within the team are eliminated'],
+  correct:[1],
+  explanation:'The Guide is explicit: when values are embodied, the empirical pillars of transparency, inspection and adaptation come to life building trust. Velocity and conflict elimination are not mentioned.',
+  scrumRef:'Scrum Guide 2020: When these values are embodied... the empirical Scrum pillars come to life building trust.' },
+
+// ══ BLOCK 2: SCRUM TEAM & ACCOUNTABILITIES (Q11-20) ══════════════════
+{ n:11, category:'Scrum Team & Accountabilities', type:'single',
+  text:'Who is accountable for maximizing the value of the product resulting from the work of the Scrum Team?',
+  options:['A. The Scrum Master, as they ensure the process delivers value','B. The Developers, as they create the product','C. The Product Owner','D. The Scrum Team collectively through Sprint Reviews'],
+  correct:[2],
+  explanation:'The PO is explicitly accountable for maximizing product value. This cannot be delegated. SM ensures process effectiveness, not product value directly.',
+  scrumRef:'Scrum Guide 2020 – The Product Owner is accountable for maximizing the value of the product.' },
+
+{ n:12, category:'Scrum Team & Accountabilities', type:'single',
+  text:'A Product Owner delegates all Product Backlog management to a Business Analyst. Which statement is correct?',
+  options:['A. The Business Analyst becomes accountable for the Product Backlog','B. The Scrum Master must approve this delegation','C. The Product Owner remains accountable even though they delegated the work','D. This is not allowed according to the Scrum Guide'],
+  correct:[2],
+  explanation:'Delegation of work is permitted but accountability cannot be transferred. The PO remains accountable regardless of who does the work.',
+  scrumRef:'Scrum Guide 2020: The Product Owner may delegate... Regardless, the Product Owner remains accountable.' },
+
+{ n:13, category:'Scrum Team & Accountabilities', type:'multi',
+  text:'Which TWO are explicit accountabilities of the Developers? (Choose 2)',
+  options:['A. Creating the Sprint Backlog','B. Ordering the Product Backlog by business value','C. Instilling quality by adhering to the Definition of Done','D. Inviting stakeholders to the Sprint Review'],
+  correct:[0,2],
+  explanation:'Ordering the PB is the PO accountability. Inviting stakeholders to Sprint Review is the PO responsibility. A and C are explicit Developer accountabilities.',
+  scrumRef:'Scrum Guide 2020 – Developers are always accountable for: creating a plan (Sprint Backlog), instilling quality (DoD).' },
+
+{ n:14, category:'Scrum Team & Accountabilities', type:'single',
+  text:'What is the recommended Scrum Team size according to the Scrum Guide?',
+  options:['A. Exactly 7 people (plus or minus 2)','B. 10 or fewer people','C. A minimum of 5 and a maximum of 12','D. No limit – it depends on product complexity'],
+  correct:[1],
+  explanation:'7 plus or minus 2 is not in the 2020 Scrum Guide. The Guide says: typically 10 or fewer. No minimum is specified.',
+  scrumRef:'Scrum Guide 2020: The Scrum Team is small enough to remain nimble... typically 10 or fewer people.' },
+
+{ n:15, category:'Scrum Team & Accountabilities', type:'single',
+  text:'The Scrum Master ensures tasks are clearly assigned to Developers. Is this correct?',
+  options:['A. Yes – ensuring clarity is a core Scrum Master accountability','B. Yes – but only during Sprint Planning','C. No – Developers are self-managing and decide internally who does what','D. No – task assignment is the Product Owner responsibility'],
+  correct:[2],
+  explanation:'Watch the word trap: ensure tasks are assigned sounds reasonable but violates self-management. Developers decide internally who does what, when and how. No one assigns tasks to them.',
+  scrumRef:'Scrum Guide 2020: Developers are self-managing, meaning they internally decide who does what, when, and how.' },
+
+// Q16 CORRECTED: Guide-accurate servant leader language
+{ n:16, category:'Scrum Team & Accountabilities', type:'single',
+  text:'The Scrum Master is best described as:',
+  options:['A. A project manager accountable for team output and delivery','B. A true leader who serves the Scrum Team and the larger organization','C. A controller who ensures Scrum rules are followed strictly','D. A technical architect who guides the Developers on how to build'],
+  correct:[1],
+  explanation:'The exact Guide wording: true leader who serves. Not a manager, not a controller, not technical. Servant leadership is the defining characteristic.',
+  scrumRef:'Scrum Guide 2020: The Scrum Master is a true leader who serves the Scrum Team and the larger organization.' },
+
+{ n:17, category:'Scrum Team & Accountabilities', type:'multi',
+  text:'Which TWO characteristics correctly describe a Scrum Team? (Choose 2)',
+  options:['A. No sub-teams or hierarchies within the team','B. Sub-teams may be created for specialized work streams','C. Cross-functional – has all skills needed to create value each Sprint','D. Managed externally by a program manager'],
+  correct:[0,2],
+  explanation:'No hierarchies, no sub-teams, cross-functional. External management contradicts self-management.',
+  scrumRef:'Scrum Guide 2020: Within a Scrum Team, there are no sub-teams or hierarchies. Scrum Teams are cross-functional.' },
+
+{ n:18, category:'Scrum Team & Accountabilities', type:'single',
+  text:'What does it mean that the Product Owner can delegate Product Backlog management work?',
+  options:['A. The delegated person becomes the Product Owner for those items','B. Accountability transfers to whoever does the work','C. The PO may assign the work to others but retains full accountability','D. The Scrum Master must cosign any delegation decisions'],
+  correct:[2],
+  explanation:'Delegation of work ≠ delegation of accountability. The PO always remains accountable.',
+  scrumRef:'Scrum Guide 2020: The Product Owner may delegate the responsibility to others. Regardless, the Product Owner remains accountable.' },
+
+{ n:19, category:'Scrum Team & Accountabilities', type:'single',
+  text:'Who decides how the work within a Sprint is done?',
+  options:['A. The Product Owner, based on business priority','B. The Scrum Master, to ensure efficiency','C. The Developers – no one else tells them how to turn PBIs into Increments','D. The Scrum Team collectively by consensus vote'],
+  correct:[2],
+  explanation:'Guide wording: no one else tells the Developers how to turn Product Backlog items into Increments of value. This is the definition of self-management in action.',
+  scrumRef:'Scrum Guide 2020: How this is done is at the sole discretion of the Developers. No one else tells them how.' },
+
+{ n:20, category:'Scrum Team & Accountabilities', type:'single',
+  text:'For the Product Owner to succeed, what must the organization ensure?',
+  options:['A. The PO has a dedicated budget and full project authority','B. The PO attends every Daily Scrum','C. The entire organization respects the Product Owner decisions','D. The PO reports directly to the CEO or a senior sponsor'],
+  correct:[2],
+  explanation:'This is an exact Guide statement. Organizational respect for PO decisions is a prerequisite for PO success. Budget, reporting lines, and Daily attendance are not mentioned.',
+  scrumRef:'Scrum Guide 2020: For Product Owners to succeed, the entire organization must respect their decisions.' },
+
+// ══ BLOCK 3: PRODUCT BACKLOG & PRODUCT GOAL (Q21-30) ══════════════════
+{ n:21, category:'Product Backlog & Product Goal', type:'single',
+  text:'What is the commitment associated with the Product Backlog?',
+  options:['A. Definition of Done','B. Sprint Goal','C. Product Goal','D. Release Roadmap'],
+  correct:[2],
+  explanation:'Each artifact has one commitment: Product Backlog → Product Goal, Sprint Backlog → Sprint Goal, Increment → Definition of Done.',
+  scrumRef:'Scrum Guide 2020 – Commitment: Product Goal.' },
+
+{ n:22, category:'Product Backlog & Product Goal', type:'single',
+  text:'The Product Owner declares the Product Backlog complete because all requirements are now documented. What does the Scrum Guide say?',
+  options:['A. Correct – a complete backlog improves Sprint Planning efficiency','B. Correct – completeness is achieved after thorough Refinement','C. Incorrect – the Product Backlog is never complete; it evolves as long as the product exists','D. Incorrect – only the Scrum Team collectively can declare the backlog complete'],
+  correct:[2],
+  explanation:'The backlog is emergent and evolves constantly. It only ceases to exist when the product is retired.',
+  scrumRef:'Scrum Guide 2020: The Product Backlog is an emergent, ordered list of what is needed to improve the product.' },
+
+{ n:23, category:'Product Backlog & Product Goal', type:'multi',
+  text:'Which TWO statements correctly describe the Product Backlog? (Choose 2)',
+  options:['A. It is ordered by the Product Owner to optimize value','B. It is emergent and evolves over time','C. It is finalized at the start of each Sprint','D. It is owned and managed collectively by all Developers'],
+  correct:[0,1],
+  explanation:'Ordered by PO (not prioritized – ordered is the Guide word). Emergent. Not fixed at Sprint start. Not owned by Developers.',
+  scrumRef:'Scrum Guide 2020: ordered list... The Product Backlog is emergent.' },
+
+{ n:24, category:'Product Backlog & Product Goal', type:'single',
+  text:'Who is accountable for ordering the Product Backlog?',
+  options:['A. The Scrum Master, as they facilitate backlog refinement','B. The Developers, as they know the technical complexity','C. The Product Owner','D. The Scrum Team collectively'],
+  correct:[2],
+  explanation:'Ordering is an explicit PO accountability. Note: accountable not responsible – the PO may delegate work but retains accountability.',
+  scrumRef:'Scrum Guide 2020: The Product Owner is accountable for... ordering Product Backlog items.' },
+
+{ n:25, category:'Product Backlog & Product Goal', type:'single',
+  text:'How many Product Goals can a Scrum Team pursue at the same time?',
+  options:['A. As many as needed to deliver maximum value','B. Two – one active and one planned','C. Exactly one – the current must be fulfilled or abandoned before taking on the next','D. One per Sprint'],
+  correct:[2],
+  explanation:'One at a time is explicit in the Guide. This creates focus and prevents fragmentation of effort.',
+  scrumRef:'Scrum Guide 2020: The Scrum Team must fulfill (or abandon) one objective before taking on the next.' },
+
+{ n:26, category:'Product Backlog & Product Goal', type:'single',
+  text:'Multiple Scrum Teams work on the same product. How many Product Backlogs should exist?',
+  options:['A. One per team to allow independent prioritization','B. One per Sprint cycle','C. One for the entire product','D. One per organizational department involved'],
+  correct:[2],
+  explanation:'One product = one Product Backlog = one Product Owner. Multiple teams share the same PB, PG, and PO.',
+  scrumRef:'Scrum Guide 2020: [multiple teams] should share the same Product Goal, Product Backlog, and Product Owner.' },
+
+{ n:27, category:'Product Backlog & Product Goal', type:'multi',
+  text:'Which TWO statements about Product Backlog Refinement are correct? (Choose 2)',
+  options:['A. Refinement is a formal Scrum event with a mandatory timebox','B. Refinement is an ongoing activity throughout the Sprint','C. Developers and the Product Owner collaborate during Refinement','D. Refinement must consume exactly 10% of Sprint capacity'],
+  correct:[1,2],
+  explanation:'Not an event, no fixed percentage. Ongoing and collaborative. 10% is a common practice, not a Scrum Guide rule.',
+  scrumRef:'Scrum Guide 2020: Product Backlog refinement is the act of breaking down and further defining... This is an ongoing activity.' },
+
+{ n:28, category:'Product Backlog & Product Goal', type:'single',
+  text:'A team uses a Definition of Ready to approve PBIs before Sprint Planning. What does the Scrum Guide say about the Definition of Ready?',
+  options:['A. It is a required companion to the Definition of Done','B. It is listed as an optional recommended practice in the Scrum Guide','C. The Definition of Ready does not exist in the Scrum Guide – it is an external practice','D. It must be defined by the Product Owner before each Sprint'],
+  correct:[2],
+  explanation:'This is a classic PSM I word trap. Definition of Ready sounds official but is NOT in the Scrum Guide. Only DoD is an official commitment. Teams may use it as a practice, but it carries no Guide authority.',
+  scrumRef:'Scrum Guide 2020: Only the Definition of Done is an official artifact commitment. No Definition of Ready exists.' },
+
+{ n:29, category:'Product Backlog & Product Goal', type:'single',
+  text:'What makes a Product Backlog item suitable for selection in Sprint Planning?',
+  options:['A. It meets the Definition of Ready','B. It has been estimated in Story Points by the Developers','C. It is small enough to be Done within one Sprint and sufficiently understood by the team','D. The Product Owner has written formal acceptance criteria for it'],
+  correct:[2],
+  explanation:'Guide language: can be Done within one Sprint and sufficiently understood. No Definition of Ready in the Guide. Story Points are not prescribed. Acceptance criteria are not required.',
+  scrumRef:'Scrum Guide 2020: Product Backlog items that can be Done by the Scrum Team within one Sprint are deemed ready for selection.' },
+
+{ n:30, category:'Product Backlog & Product Goal', type:'single',
+  text:'The Product Backlog is the single source of work for the Scrum Team. Who may add items to it?',
+  options:['A. Only the Product Owner','B. Only Developers for technical work items','C. Anyone – but the Product Owner remains accountable for ordering and managing it','D. Only people who attend Sprint Planning'],
+  correct:[2],
+  explanation:'Anyone may suggest items. The PO is accountable for the backlog – ordering, prioritization, transparency. The backlog is open for input but not for management by others.',
+  scrumRef:'Scrum Guide 2020: The Product Backlog is the single source of work undertaken by the Scrum Team.' },
+
+// ══ BLOCK 4: SPRINT & SPRINT PLANNING (Q31-40) ══════════════════════
+{ n:31, category:'Sprint & Sprint Planning', type:'single',
+  text:'A team is considering extending their Sprint to 6 weeks to deliver more complete features. What does the Scrum Guide say?',
+  options:['A. Acceptable if the team and PO agree','B. Acceptable for experienced teams with well-understood work','C. Not allowed – Sprints are fixed length events of one month or less','D. Sprint length is a management decision based on release cycles'],
+  correct:[2],
+  explanation:'One month maximum is explicit and has no exceptions. Not experience-based, not management-decided. B is a common trap.',
+  scrumRef:'Scrum Guide 2020: They are fixed length events of one month or less to create consistency.' },
+
+{ n:32, category:'Sprint & Sprint Planning', type:'single',
+  text:'A Sprint can be extended if the team needs more time to complete all Sprint Backlog items. True or false?',
+  options:['A. True – quality requires adequate time','B. True – the PO can approve an extension','C. False – Sprints have a fixed length that cannot be changed once started','D. False – only the Scrum Master can shorten or extend a Sprint'],
+  correct:[2],
+  explanation:'Sprints cannot be extended. Undone work returns to the Product Backlog. Extending is not an option in Scrum.',
+  scrumRef:'Scrum Guide 2020: Sprints are fixed length events. A Sprint could be cancelled [but not extended].' },
+
+// Q33 CORRECTED: Option B replaced, clear set of exactly 3 correct answers
+{ n:33, category:'Sprint & Sprint Planning', type:'multi',
+  text:'Which THREE statements correctly describe rules that apply during a Sprint? (Choose 3)',
+  options:['A. No changes are made that would endanger the Sprint Goal','B. Quality standards may be reduced if needed to meet the Sprint Goal','C. Scope may be clarified and renegotiated with the Product Owner','D. A new Sprint begins immediately after the previous Sprint ends','E. The Sprint can be cancelled by any Scrum Team member if the goal is no longer relevant'],
+  correct:[0,2,3],
+  explanation:'B is wrong – quality never decreases. E is wrong – only the PO cancels a Sprint. A, C, D are three correct Sprint rules per the Guide.',
+  scrumRef:'Scrum Guide 2020 – The Sprint: No changes endanger Sprint Goal; Quality does not decrease; Scope may be renegotiated; New Sprint starts immediately.' },
+
+{ n:34, category:'Sprint & Sprint Planning', type:'single',
+  text:'During Sprint Planning, the Product Owner wants to ensure the most valuable items are selected. Who decides how many items go into the Sprint Backlog?',
+  options:['A. The Product Owner – they are accountable for value','B. The Scrum Master – they know the team capacity from velocity data','C. The Developers – only they can assess what they are capable of accomplishing','D. The Scrum Team by consensus vote'],
+  correct:[2],
+  explanation:'Only the Developers can assess capacity. The PO explains priority and value. No one can impose a workload on the Developers.',
+  scrumRef:'Scrum Guide 2020: Only the Developers can assess what they are capable of accomplishing over the upcoming Sprint.' },
+
+{ n:35, category:'Sprint & Sprint Planning', type:'single',
+  text:'What are the three topics that Sprint Planning addresses according to the Scrum Guide?',
+  options:['A. Why is this Sprint valuable? What can be Done? How will the work get done?','B. Who does what? When is it done? What are the risks?','C. What was done last Sprint? What will be done? What are the blockers?','D. What is the Sprint Goal? What is the capacity? What are the dependencies?'],
+  correct:[0],
+  explanation:'Why (Sprint Goal / value), What (selected PBIs), How (plan). Not status, not risk, not capacity planning.',
+  scrumRef:'Scrum Guide 2020 – Sprint Planning: Topic One: Why is this Sprint valuable? Topic Two: What can be Done? Topic Three: How?' },
+
+{ n:36, category:'Sprint & Sprint Planning', type:'single',
+  text:'Who has the authority to cancel a Sprint?',
+  options:['A. The Scrum Master if the team is severely blocked','B. The Developers if the Sprint Goal is no longer achievable','C. Only the Product Owner','D. The Scrum Team by majority vote'],
+  correct:[2],
+  explanation:'Only the PO. The reason must be that the Sprint Goal has become obsolete. The SM and Developers do not have this authority.',
+  scrumRef:'Scrum Guide 2020: Only the Product Owner has the authority to cancel the Sprint.' },
+
+// Q37 CORRECTED: Rewritten to be unambiguous
+{ n:37, category:'Sprint & Sprint Planning', type:'single',
+  text:'The Sprint Retrospective takes place before the Sprint Review. Is this correct?',
+  options:['A. Yes – reflecting first helps the team prepare a better Review','B. Yes – the Scrum Master decides the order of events','C. No – the Sprint Review happens first, followed by the Retrospective','D. No – both events can be combined into one session to save time'],
+  correct:[2],
+  explanation:'Correct sequence: Sprint Planning → Daily Scrums → Sprint Review → Sprint Retrospective. The Retro concludes the Sprint. Combining events is not allowed.',
+  scrumRef:'Scrum Guide 2020: [Retro is] positioned after the Sprint Review and prior to the next Sprint Planning.' },
+
+{ n:38, category:'Sprint & Sprint Planning', type:'single',
+  text:'What is the commitment associated with the Sprint Backlog?',
+  options:['A. Product Goal','B. Sprint Goal','C. Definition of Done','D. Sprint Forecast'],
+  correct:[1],
+  explanation:'Sprint Backlog → Sprint Goal. Product Backlog → Product Goal. Increment → DoD. Sprint Forecast is not a Scrum commitment.',
+  scrumRef:'Scrum Guide 2020 – Commitment: Sprint Goal.' },
+
+{ n:39, category:'Sprint & Sprint Planning', type:'multi',
+  text:'Which TWO actions are explicitly allowed during a running Sprint? (Choose 2)',
+  options:['A. Adapting the daily plan toward the Sprint Goal','B. Changing the Sprint Goal when new information arrives','C. Renegotiating scope with the Product Owner while protecting the Sprint Goal','D. Skipping the Definition of Done for urgent high-value items'],
+  correct:[0,2],
+  explanation:'Sprint Goal cannot change. DoD cannot be skipped. Adapting the plan and renegotiating scope with PO are explicitly allowed.',
+  scrumRef:'Scrum Guide 2020: scope may be clarified and renegotiated with the Product Owner as more is learned.' },
+
+{ n:40, category:'Sprint & Sprint Planning', type:'single',
+  text:'A new Sprint begins immediately after the previous Sprint ends. Is this correct?',
+  options:['A. Yes – this is stated in the Scrum Guide','B. Yes – but only after the Sprint Review is completed','C. No – there is always a planning gap between Sprints','D. No – the Product Owner decides when the next Sprint starts'],
+  correct:[0],
+  explanation:'Guide explicit: A new Sprint starts immediately after the conclusion of the previous Sprint. No gap, no planning pause.',
+  scrumRef:'Scrum Guide 2020: A new Sprint starts immediately after the conclusion of the previous Sprint.' },
+
+// ══ BLOCK 5: DAILY SCRUM (Q41-46) ══════════════════════════════════
+// Q41 IMPROVED: stronger distractor D added per feedback
+
+{ n:41, category:'Daily Scrum', type:'single',
+  text:'What is the primary purpose of the Daily Scrum?',
+  options:['A. To report progress to the Scrum Master and Product Owner','B. To inspect progress toward the Sprint Goal and adapt the Sprint Backlog','C. To answer the three classic questions: did, will, blockers','D. To coordinate work and ensure alignment within the team'],
+  correct:[1],
+  explanation:'B is the exact Guide purpose. A is wrong (not a report to anyone). C – the three questions were removed in 2020. D sounds right but is too vague – the Guide specifies inspecting the Sprint Goal specifically.',
+  scrumRef:'Scrum Guide 2020: inspect progress toward the Sprint Goal and adapt the Sprint Backlog as necessary.' },
+
+{ n:42, category:'Daily Scrum', type:'single',
+  text:'The Daily Scrum is a status meeting for the Scrum Master. True or false?',
+  options:['A. True – the SM needs daily status to remove impediments effectively','B. True – but the SM only observes without participating','C. False – the Daily Scrum is for the Developers, not a status meeting','D. False – the PO must also attend to stay informed on Sprint progress'],
+  correct:[2],
+  explanation:'False on two counts: it is for Developers (not SM), and it is not a status meeting. D introduces the PO as mandatory – also wrong.',
+  scrumRef:'Scrum Guide 2020: The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.' },
+
+{ n:43, category:'Daily Scrum', type:'single',
+  text:'The Daily Scrum regularly runs 30 minutes because of complex topics. What should happen?',
+  options:['A. The Scrum Master extends the timebox when needed','B. This is acceptable – complex Sprints need more time','C. The Developers adapt their structure to stay within 15 minutes','D. The Product Owner should attend to help prioritize discussion topics'],
+  correct:[2],
+  explanation:'15 minutes is a hard timebox. Developers choose their own format and must adapt it to fit. SM cannot extend. PO attendance does not change the timebox.',
+  scrumRef:'Scrum Guide 2020: The Daily Scrum is a 15-minute event. Developers can select whatever structure they want.' },
+
+{ n:44, category:'Daily Scrum', type:'single',
+  text:'The Scrum Master must run the Daily Scrum and ask each Developer the three classic questions. What is wrong here?',
+  options:['A. Nothing – this is the correct format per the Scrum Guide','B. The Daily Scrum belongs to the Developers, who choose their own structure and techniques','C. The three questions are mandatory but the SM should not ask them','D. The SM should only observe the Daily, not facilitate it'],
+  correct:[1],
+  explanation:'Two errors: the Daily belongs to Developers (not SM), and the three questions were removed from the 2020 Guide. C maintains the wrong assumption that questions are mandatory.',
+  scrumRef:'Scrum Guide 2020: Developers can select whatever structure and techniques they want.' },
+
+{ n:45, category:'Daily Scrum', type:'single',
+  text:'Who must attend the Daily Scrum according to the Scrum Guide?',
+  options:['A. The entire Scrum Team – all three accountabilities','B. The Developers','C. Developers and the Scrum Master','D. Developers and the Product Owner to monitor Sprint progress'],
+  correct:[1],
+  explanation:'The Developers. SM and PO may attend if they are also doing Developer work. No one is mandated except Developers.',
+  scrumRef:'Scrum Guide 2020: The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.' },
+
+{ n:46, category:'Daily Scrum', type:'single',
+  text:'The format of the Daily Scrum is fixed and prescribed by the Scrum Guide. True or false?',
+  options:['A. True – the three questions provide the mandatory structure','B. True – but teams can adjust the timing','C. False – Developers choose whatever structure and techniques work for them','D. False – the Scrum Master chooses the format each Sprint'],
+  correct:[2],
+  explanation:'Complete flexibility in format. No prescribed questions (removed in 2020), no standing requirement, no SM-chosen format.',
+  scrumRef:'Scrum Guide 2020: The Developers can select whatever structure and techniques they want.' },
+
+// ══ BLOCK 6: SPRINT REVIEW & RETROSPECTIVE (Q47-56) ══════════════════
+{ n:47, category:'Sprint Review & Retrospective', type:'single',
+  text:'What is the primary output of the Sprint Review?',
+  options:['A. A signed acceptance document from stakeholders','B. A revised Product Backlog','C. A new Sprint Goal for the next Sprint','D. A formal release decision by the Product Owner'],
+  correct:[1],
+  explanation:'The output is a revised Product Backlog with probable next steps. No formal acceptance. Sprint Goal is created in Sprint Planning. Release decisions are separate from the Review output.',
+  scrumRef:'Scrum Guide 2020: The result of the Sprint Review is a revised Product Backlog.' },
+
+{ n:48, category:'Sprint Review & Retrospective', type:'single',
+  text:'A stakeholder says: I will only sign off on this Increment if all features meet my exact specifications. What is the best response?',
+  options:['A. The PO negotiates with the stakeholder to find acceptable conditions','B. The Sprint Review is not a sign-off or acceptance ceremony – it is for inspection and adaptation','C. The Scrum Master decides whether the conditions are acceptable','D. The team adds the missing features to the current Sprint'],
+  correct:[1],
+  explanation:'No formal acceptance exists in Scrum. The Sprint Review is collaborative inspection and adaptation. Stakeholder feedback goes into the Product Backlog.',
+  scrumRef:'Scrum Guide 2020: The purpose of the Sprint Review is to inspect the outcome and determine future adaptations.' },
+
+{ n:49, category:'Sprint Review & Retrospective', type:'single',
+  text:'Who invites stakeholders to the Sprint Review?',
+  options:['A. The Scrum Master, as they coordinate external communication','B. The Developers, as they present their work','C. The Product Owner','D. All Scrum Team members by consensus'],
+  correct:[2],
+  explanation:'PO invites key stakeholders. The PO is the interface between the team and stakeholders.',
+  scrumRef:'Scrum Guide 2020: The Product Owner invites key stakeholders to attend the Sprint Review.' },
+
+{ n:50, category:'Sprint Review & Retrospective', type:'single',
+  text:'What is the maximum timebox for the Sprint Review in a one-month Sprint?',
+  options:['A. 2 hours','B. 3 hours','C. 4 hours','D. 8 hours'],
+  correct:[2],
+  explanation:'4 hours maximum for a one-month Sprint. Shorter Sprints get proportionally shorter reviews.',
+  scrumRef:'Scrum Guide 2020: Sprint Review is a four hour maximum event for a one-month Sprint.' },
+
+{ n:51, category:'Sprint Review & Retrospective', type:'single',
+  text:'What is the purpose of the Sprint Retrospective according to the Scrum Guide?',
+  options:['A. To review what went wrong and assign accountability for failures','B. To document lessons learned for future project records','C. To plan ways to increase quality and effectiveness','D. To align with stakeholders on the product direction for the next Sprint'],
+  correct:[2],
+  explanation:'Guide exact: plan ways to increase quality and effectiveness. Forward-looking, not blame-focused. Not for documentation or stakeholder alignment.',
+  scrumRef:'Scrum Guide 2020: The purpose of the Sprint Retrospective is to plan ways to increase quality and effectiveness.' },
+
+// Q52 CORRECTED: softened formulation per feedback
+{ n:52, category:'Sprint Review & Retrospective', type:'single',
+  text:'The Sprint Retrospective is an event for the Scrum Team. A manager wants to attend. Which statement best reflects the Scrum Guide?',
+  options:['A. The manager is welcome – diverse perspectives improve the Retrospective','B. The Scrum Master decides based on team maturity','C. The Retrospective is for the Scrum Team – external participants are not part of this event','D. The manager may observe but not speak'],
+  correct:[2],
+  explanation:'The Guide describes the Retro as the Scrum Team inspecting itself. External participants are not part of this event. The phrasing here avoids saying the Guide explicitly forbids it – instead it reflects what the Guide does say: it is a Scrum Team event.',
+  scrumRef:'Scrum Guide 2020: The Scrum Team inspects how the last Sprint went with regards to individuals, interactions, processes, tools, and their Definition of Done.' },
+
+{ n:53, category:'Sprint Review & Retrospective', type:'single',
+  text:'When does the Sprint Retrospective take place?',
+  options:['A. Before the Sprint Review to prepare the team for reflection','B. At the start of a new Sprint before planning','C. After the Sprint Review and before the next Sprint Planning','D. At any point during the Sprint when the team identifies improvement needs'],
+  correct:[2],
+  explanation:'Review then Retrospective then Sprint Planning. The Retro concludes the Sprint.',
+  scrumRef:'Scrum Guide 2020: positioned after the Sprint Review and prior to the next Sprint Planning. The Sprint Retrospective concludes the Sprint.' },
+
+{ n:54, category:'Sprint Review & Retrospective', type:'single',
+  text:'A team skips the Sprint Retrospective because the Sprint went smoothly. Is this acceptable?',
+  options:['A. Yes – the Retrospective is only needed when there are problems','B. Yes – mature self-managing teams can decide which events to hold','C. No – all Scrum events are mandatory regardless of Sprint outcome','D. Yes – with approval from the Product Owner'],
+  correct:[2],
+  explanation:'All events are mandatory. Continuous improvement applies even when things go well. Self-management does not mean choosing which events to attend.',
+  scrumRef:'Scrum Guide 2020: All events are time-boxed. Scrum is incomplete when any element is removed.' },
+
+{ n:55, category:'Sprint Review & Retrospective', type:'multi',
+  text:'Which TWO statements about the Sprint Retrospective are correct? (Choose 2)',
+  options:['A. The Retrospective concludes the Sprint','B. The output must be submitted as a formal improvement report to management','C. The most important improvement identified may be added to the next Sprint Backlog','D. The Scrum Master must facilitate the Retrospective'],
+  correct:[0,2],
+  explanation:'Concludes the Sprint – correct. May add top improvement to Sprint Backlog – correct (may, not must). No formal report required. SM does not have to facilitate.',
+  scrumRef:'Scrum Guide 2020: The Sprint Retrospective concludes the Sprint.' },
+
+{ n:56, category:'Sprint Review & Retrospective', type:'single',
+  text:'What is the maximum timebox for the Sprint Retrospective in a one-month Sprint?',
+  options:['A. 1 hour','B. 2 hours','C. 3 hours','D. 4 hours'],
+  correct:[2],
+  explanation:'3 hours maximum for a one-month Sprint.',
+  scrumRef:'Scrum Guide 2020: Sprint Retrospective is a three hour maximum event for a one-month Sprint.' },
+
+// ══ BLOCK 7: INCREMENT & DEFINITION OF DONE (Q57-66) ══════════════════
+{ n:57, category:'Increment & Definition of Done', type:'single',
+  text:'The Product Owner reviews the Sprint output and says it looks good. The Definition of Done includes automated tests that are incomplete. What is the correct assessment?',
+  options:['A. The Increment is Done – the Product Owner has authority to accept work','B. The Increment is Done – PO approval supersedes the formal DoD','C. The Increment is not Done – the DoD is a formal standard and cannot be overridden by PO approval','D. The Scrum Master confirms Done status when PO and SM both agree'],
+  correct:[2],
+  explanation:'Done is defined exclusively by the DoD. PO approval does not override it. No combination of approvals replaces the DoD.',
+  scrumRef:'Scrum Guide 2020: The Definition of Done is a formal description... If a PBI does not meet the DoD, it cannot be released or even presented at Sprint Review.' },
+
+{ n:58, category:'Increment & Definition of Done', type:'single',
+  text:'A PBI does not meet the Definition of Done by Sprint end. What happens?',
+  options:['A. It is marked in progress and automatically carried over to the next Sprint','B. The PO can conditionally accept it if it is more than 80% complete','C. It cannot be presented in Sprint Review and returns to the Product Backlog','D. The team gets one additional day to complete it'],
+  correct:[2],
+  explanation:'No almost done in Scrum. No automatic carryover. No percentage-based acceptance. Undone work returns to the PB for the PO to reprioritize.',
+  scrumRef:'Scrum Guide 2020: If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review.' },
+
+{ n:59, category:'Increment & Definition of Done', type:'single',
+  text:'How many Increments can be created within a single Sprint?',
+  options:['A. Exactly one – one Increment per Sprint','B. One per Developer on the team','C. Multiple Increments may be created within a Sprint','D. Zero until the Sprint Review validates the work'],
+  correct:[2],
+  explanation:'Each PBI that meets the DoD creates an Increment. Multiple can exist in one Sprint. Increments are born throughout the Sprint, not just at the Review.',
+  scrumRef:'Scrum Guide 2020: Multiple Increments may be created within a Sprint.' },
+
+{ n:60, category:'Increment & Definition of Done', type:'single',
+  text:'What is the commitment associated with the Increment?',
+  options:['A. Sprint Goal','B. Product Goal','C. Definition of Done','D. Release Criteria'],
+  correct:[2],
+  explanation:'Increment → DoD. Product Backlog → Product Goal. Sprint Backlog → Sprint Goal.',
+  scrumRef:'Scrum Guide 2020 – Commitment: Definition of Done.' },
+
+{ n:61, category:'Increment & Definition of Done', type:'single',
+  text:'Who creates the Definition of Done when no organizational standard exists?',
+  options:['A. The Scrum Master, as they are accountable for quality practices','B. The Product Owner, as they define acceptance criteria','C. The Scrum Team must create an appropriate Definition of Done for the product','D. External quality auditors or a QA department'],
+  correct:[2],
+  explanation:'The Scrum Team creates it when no org standard exists. Not the SM alone, not the PO alone.',
+  scrumRef:'Scrum Guide 2020: If the Definition of Done... is not an organizational standard, the Scrum Team must create a Definition of Done appropriate for the product.' },
+
+{ n:62, category:'Increment & Definition of Done', type:'single',
+  text:'The team skips automated testing (part of the DoD) to meet a release deadline. Management approves. Is this acceptable?',
+  options:['A. Yes – release deadlines take priority in business-critical situations','B. Yes – management approval overrides the DoD for this release','C. No – the Definition of Done cannot be selectively applied; undone work is not a Done Increment','D. Yes – if the Scrum Master documents it as technical debt'],
+  correct:[2],
+  explanation:'DoD is a non-negotiable formal standard. No authority – not management, not PO, not SM – can waive it for individual releases.',
+  scrumRef:'Scrum Guide 2020: The Definition of Done is a formal description of the state of the Increment when it meets the quality measures required.' },
+
+{ n:63, category:'Increment & Definition of Done', type:'single',
+  text:'Multiple Scrum Teams work on the same product, each with different Definitions of Done. What should happen?',
+  options:['A. Each team keeps their own DoD to maintain team autonomy','B. Management creates one unified DoD for all teams','C. Each team must use a DoD that is at least as strict as the minimum organizational standard','D. The Product Owner selects which DoD applies to each Sprint Review'],
+  correct:[2],
+  explanation:'Teams may add stricter criteria but not looser ones. Shared product requires compatible quality standards.',
+  scrumRef:'Scrum Guide 2020: If there are multiple Scrum Teams... they must mutually define and comply with the same Definition of Done.' },
+
+{ n:64, category:'Increment & Definition of Done', type:'single',
+  text:'The Increment meets the Definition of Done. The Product Owner decides not to release it. What is the status of the Increment?',
+  options:['A. No longer Done – it must be re-reviewed in the next Sprint','B. Done – the release decision is a separate business decision by the PO','C. The Scrum Master must document the non-release decision','D. On hold – Done status expires after 30 days without release'],
+  correct:[1],
+  explanation:'Done = meets DoD. Release is a separate PO decision. Done status is not affected by the release decision.',
+  scrumRef:'Scrum Guide 2020: The decision to release any Increment is entirely at the discretion of the Product Owner.' },
+
+{ n:65, category:'Increment & Definition of Done', type:'multi',
+  text:'Which TWO statements about the Definition of Done are correct? (Choose 2)',
+  options:['A. The DoD creates transparency about the quality state of the Increment','B. The DoD is defined by the Scrum Master and reviewed each Sprint','C. The DoD may evolve as the Scrum Team learns and improves','D. The DoD is optional for teams using continuous deployment pipelines'],
+  correct:[0,2],
+  explanation:'DoD creates transparency – correct. DoD may evolve – correct. Not set by SM alone. Never optional.',
+  scrumRef:'Scrum Guide 2020: The Definition of Done creates transparency... [it] evolves as the Scrum Team learns.' },
+
+{ n:66, category:'Increment & Definition of Done', type:'single',
+  text:'A team argues that since their stakeholders are happy with the output, they do not need a Definition of Done. What is the best response?',
+  options:['A. Acceptable – stakeholder satisfaction is the ultimate definition of value','B. Acceptable – mature teams can replace DoD with stakeholder feedback loops','C. Not acceptable – the DoD is a formal commitment that creates shared quality standards; stakeholder opinions do not replace it','D. Not acceptable – but the Scrum Master can waive it temporarily for established teams'],
+  correct:[2],
+  explanation:'This is a best-possible-answer question. Stakeholder satisfaction is important but does not replace the DoD as a formal quality standard. No waiver exists.',
+  scrumRef:'Scrum Guide 2020: The Definition of Done is a formal description of the state of the Increment when it meets the quality measures required for the product.' },
+
+// ══ BLOCK 8: SCENARIOS, ANTI-PATTERNS & BEST POSSIBLE ANSWER (Q67-80) ══
+{ n:67, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'Management compares velocity across Scrum Teams and demands explanation from lower-velocity teams. What is the core problem?',
+  options:['A. Velocity comparisons should only be done within a team over time','B. Velocity is not a Scrum concept – it is a team-specific external metric not suitable for cross-team comparison','C. Velocity comparison is valid if Sprint lengths and team sizes are standardized','D. The Scrum Master should present velocity data to management'],
+  correct:[1],
+  explanation:'Velocity and Story Points are not in the Scrum Guide. Story Points are relative and team-specific – comparison is meaningless and incentivizes manipulation.',
+  scrumRef:'Scrum Guide 2020: Velocity and Story Points are not mentioned. No cross-team comparison metrics prescribed.' },
+
+{ n:68, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'The Scrum Master creates burndown charts for every Sprint and presents them to management. What does the Scrum Guide say?',
+  options:['A. Burndown charts are mandatory tools for the Scrum Master','B. Burndown charts are recommended but not required by the Scrum Guide','C. Burndown charts are useful external tools but are not part of the Scrum Guide','D. Only the Product Owner may create burndown charts'],
+  correct:[2],
+  explanation:'Burndown charts were removed from the 2020 Scrum Guide. They are useful practices but carry no Guide authority.',
+  scrumRef:'Scrum Guide 2020: Various practices exist to forecast progress... but these do not replace the importance of empiricism.' },
+
+{ n:69, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'A team removes the Sprint Retrospective to save time. Which response best reflects the Scrum Guide?',
+  options:['A. Acceptable if the team is mature and identifies improvements informally','B. This means the team is no longer practicing Scrum as defined by the Scrum Guide','C. Allowed after 6 months of Scrum adoption','D. Allowed if the Product Owner agrees in writing'],
+  correct:[1],
+  explanation:'Scrum is incomplete when any element is removed. No maturity exceptions, no approval pathways for removing events.',
+  scrumRef:'Scrum Guide 2020: Scrum is purposefully incomplete... [it] may be changed but not removed.' },
+
+{ n:70, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'The Scrum Team pursues two Product Goals simultaneously to maximize output. What is the problem?',
+  options:['A. No problem – multiple goals increase team throughput','B. The Scrum Guide requires one Product Goal at a time to maintain focus and coherence','C. Only the Scrum Master can approve parallel Product Goals','D. Two goals are acceptable if the Sprint Goals remain distinct'],
+  correct:[1],
+  explanation:'One Product Goal at a time is explicit. Multiple goals fragment focus and undermine the Sprint Goal commitment.',
+  scrumRef:'Scrum Guide 2020: The Scrum Team must fulfill (or abandon) one objective before taking on the next.' },
+
+{ n:71, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'A Scrum Team automatically carries undone Sprint Backlog items into the next Sprint. What is the issue?',
+  options:['A. No issue – this is efficient resource management','B. Undone items must return to the Product Backlog; the PO decides if and when to reschedule them','C. The Scrum Master must approve each carryover','D. Carryover is acceptable if the Sprint Goal was met'],
+  correct:[1],
+  explanation:'Auto-carryover bypasses PO prioritization, hides delivery problems, and undermines the empirical process.',
+  scrumRef:'Scrum Guide 2020: [Undone work returns to the Product Backlog for PO to reprioritize.]' },
+
+{ n:72, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'During Sprint Planning, the Product Owner assigns specific tasks to individual Developers. What is the anti-pattern?',
+  options:['A. The PO should only speak during the first hour of Sprint Planning','B. Assigning tasks violates Developer self-management – Developers decide internally who does what','C. The PO must only communicate through the Scrum Master','D. Task assignment should only happen in the Daily Scrum'],
+  correct:[1],
+  explanation:'Self-management means Developers decide who does what, when and how. Task assignment by anyone else – PO, SM, manager – violates this principle.',
+  scrumRef:'Scrum Guide 2020: Developers are self-managing, meaning they internally decide who does what, when, and how.' },
+
+{ n:73, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'What is the BEST action for a Scrum Master when a manager starts assigning tasks directly to Developers?',
+  options:['A. Accept it – the manager has organizational authority','B. Ask the PO to handle it – stakeholder management is the PO responsibility','C. Coach the manager on Scrum and clarify that all work flows through the Product Backlog','D. Block all manager access to the Developers to protect the team'],
+  correct:[2],
+  explanation:'Best Possible Answer question. A surrenders self-management. B avoids the SM responsibility. D is too extreme and adversarial. C reflects servant leadership: coach the organization, clarify the process.',
+  scrumRef:'Scrum Guide 2020: SM serves the organization by helping employees understand Scrum. No one may instruct Developers to work from a different set of requirements.' },
+
+{ n:74, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'The Sprint Review is prepared as a polished one-way presentation with no room for stakeholder input. What is the problem?',
+  options:['A. Presentations are fine – they make the Review more professional','B. The Sprint Review should be a collaborative working session for inspection and adaptation','C. Only technical demonstrations are allowed in Sprint Reviews','D. The Scrum Master must facilitate all stakeholder interactions'],
+  correct:[1],
+  explanation:'Sprint Review is collaborative, not presentational. Blocking input prevents inspection and adaptation – which is the entire purpose.',
+  scrumRef:'Scrum Guide 2020: Sprint Review is a working session and the Scrum Team should avoid limiting it to a presentation.' },
+
+{ n:75, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'What is the BEST approach for a Scrum Master when management requests weekly status reports?',
+  options:['A. Produce the reports – stakeholder transparency is important','B. Refuse – the Scrum Master never produces reports of any kind','C. Use Scrum artifacts to provide transparency and coach management on how to read them','D. Ask the Product Owner to produce the reports instead'],
+  correct:[2],
+  explanation:'Best Possible Answer. A builds a parallel reporting structure. B is too rigid. D displaces the issue. C reflects SM servant leadership: use Scrum artifacts, coach the organization.',
+  scrumRef:'Scrum Guide 2020: SM serves the organization by helping stakeholders understand and enact an empirical approach.' },
+
+// Q76 CORRECTED: Rewritten to make True unambiguously correct
+{ n:76, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'The Scrum Guide states that Scrum is purposefully incomplete and only defines the parts required to implement Scrum theory. True or false?',
+  options:['A. True – Scrum intentionally leaves room for teams to add practices within its framework','B. False – Scrum provides a complete and detailed process for all situations','C. False – Scrum is only incomplete until the team reaches full maturity','D. True – but only for teams that have been practicing Scrum for more than one year'],
+  correct:[0],
+  explanation:'Guide exact wording: Scrum is purposefully incomplete, only defining the parts required to implement Scrum theory. This is intentional – teams add practices, tools and techniques within the framework.',
+  scrumRef:'Scrum Guide 2020: Scrum is purposefully incomplete, only defining the parts required to implement Scrum theory.' },
+
+// Q77 CORRECTED: verification removed, value delivery used instead
+{ n:77, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'Who is accountable for all product-related activities including stakeholder collaboration and value delivery?',
+  options:['A. Product Owner – they are accountable for value','B. Scrum Master – they ensure the process delivers outcomes','C. The entire Scrum Team','D. Developers only, as they create the product'],
+  correct:[2],
+  explanation:'The entire Scrum Team is accountable for all product-related activities. Not PO alone, not SM, not Developers alone. This is a collective accountability.',
+  scrumRef:'Scrum Guide 2020: The Scrum Team is responsible for all product-related activities from stakeholder collaboration, value delivery, maintenance, and anything else that might be required.' },
+
+{ n:78, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'Developers decide internally who does what, when, and how during the Sprint. True or false?',
+  options:['A. True – this is the definition of self-management in the Scrum Guide','B. True – but the Scrum Master must approve major work allocation decisions','C. False – the Product Owner allocates work based on business priority','D. False – work allocation is decided collectively during Sprint Planning'],
+  correct:[0],
+  explanation:'A is the exact Scrum Guide statement. B adds an approval step that does not exist. C is wrong – PO does not allocate work. D confuses selecting PBIs with task allocation.',
+  scrumRef:'Scrum Guide 2020: Developers are self-managing, meaning they internally decide who does what, when, and how.' },
+
+{ n:79, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'Which scenario represents a violation of the Sprint Goal commitment?',
+  options:['A. The Product Owner changes the Sprint Goal mid-Sprint due to urgent stakeholder pressure','B. The Developers renegotiate scope with the PO to protect the Sprint Goal','C. The team presents Done Increments in the Sprint Review','D. The Scrum Master removes an organizational impediment blocking the team'],
+  correct:[0],
+  explanation:'Only A violates the Sprint Goal. B is allowed (scope renegotiation to protect the goal). C is correct behavior. D is SM servant leadership.',
+  scrumRef:'Scrum Guide 2020: No changes are made that would endanger the Sprint Goal.' },
+
+{ n:80, category:'Scenarios & Anti-Patterns', type:'single',
+  text:'Scrum guarantees product success if all Scrum rules are followed correctly. True or false?',
+  options:['A. True – empiricism ensures the right product is built','B. True – if all events and artifacts are used correctly, success follows','C. False – Scrum provides a framework for empirical decision-making but does not guarantee success','D. False – success requires SAFe or other scaling frameworks in addition to Scrum'],
+  correct:[2],
+  explanation:'Scrum is a framework, not a guarantee. It helps teams make better decisions and respond to change – but product success depends on many factors outside the framework.',
+  scrumRef:'Scrum Guide 2020: Scrum helps people... generate value through adaptive solutions. It is not a success guarantee.' },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let totalPoints = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+
+let timerInterval = null;
+let timeLeft = 50 * 60;
+function startTimer() {
+  const el = document.getElementById('exam-timer');
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    if (el) {
+      el.textContent = '⏱ ' + m + ':' + String(s).padStart(2,'0');
+      if (timeLeft <= 300) el.style.color = '#FF6B6B';
+      else if (timeLeft <= 600) el.style.color = '#FFA500';
+      else el.style.color = '#A78BFA';
+    }
+    if (timeLeft <= 0) { clearInterval(timerInterval); showResult(); }
+  }, 1000);
+}
+function startQuiz() {
+  startTimer();
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  totalPoints = shuffledQuestions.length;
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Question ${currentQuestion + 1} of ${total}`;
+  document.getElementById('live-score').textContent = `Score: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const isMulti = q.type === 'multi';
+  const letters = ['A','B','C','D','E','F'];
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${isMulti ? '☐' : letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const multiBadge = isMulti
+    ? `<div class="multi-badge">✦ MULTIPLE ANSWERS – Choose ${q.correct.length}</div>`
+    : '';
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-difficulty">Schwierigkeit: ${q.difficulty} · ${isMulti ? 'Multiple Choice' : 'Single Choice'}</div>
+          ${multiBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  const q = shuffledQuestions[currentQuestion];
+  const isMulti = q.type === 'multi';
+  const option = document.querySelector(`.option[data-index="${idx}"]`);
+
+  if (!isMulti) {
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.option-marker').textContent = ['A','B','C','D','E','F'][parseInt(o.dataset.index)];
+    });
+    selectedOptions.clear();
+    selectedOptions.add(idx);
+    option.classList.add('selected');
+    option.querySelector('.option-marker').textContent = '✓';
+  } else {
+    if (selectedOptions.has(idx)) {
+      selectedOptions.delete(idx);
+      option.classList.remove('selected');
+      option.querySelector('.option-marker').textContent = '☐';
+    } else {
+      selectedOptions.add(idx);
+      option.classList.add('selected');
+      option.querySelector('.option-marker').textContent = '☑';
+    }
+  }
+  document.getElementById('check-btn').disabled = selectedOptions.size === 0;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions).sort();
+  const correctArr = [...correctSet].sort();
+
+  const isFullyCorrect = selectedArr.length === correctArr.length &&
+    selectedArr.every(i => correctSet.has(i));
+
+  if (isFullyCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isFullyCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isFullyCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isFullyCorrect ? '✅ Richtig!' : '❌ Leider nicht vollständig korrekt'}
+    </div>
+    ${!isFullyCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort(en): ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="scrum-guide-ref"><strong>📖 Scrum Guide Referenz:</strong> ${q.scrumRef}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isFullyCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Score: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isFullyCorrect) {
+    const correctTexts = q.correct.map(i => q.options[i]).join(' / ');
+    wrongAnswers.push({
+      frage: q.text.substring(0, 90) + (q.text.length > 90 ? '...' : ''),
+      kategorie: q.category,
+      typ: q.type === 'multi' ? 'Multiple Choice' : 'Single Choice',
+      erklaerung: q.explanation,
+      richtigeAntwort: correctTexts
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT
+// ─────────────────────────────────────────────
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  let wrongDetails = '';
+  if (wrongAnswers.length === 0) {
+    wrongDetails = '<p style="color:#10B981;font-size:15px;font-weight:700;margin:0;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>';
+  } else {
+    wrongDetails = wrongAnswers.map((w, i) => `
+      <div style="background:#1e2433;border-left:4px solid #C703FF;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:#C703FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${i+1}. ${w.kategorie} · ${w.typ}
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">❓ ${w.frage}</div>
+        <div style="background:#0d3320;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <span style="color:#10B981;font-weight:700;">✅ Richtige Antwort(en):</span>
+          <span style="color:#d1fae5;font-size:12px;"> ${w.richtigeAntwort}</span>
+        </div>
+        <div style="color:#9AA4B2;font-size:12px;line-height:1.7;">💡 ${w.erklaerung}</div>
+      </div>
+    `).join('');
+  }
+
+  const wrongQuestions = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    score: score, total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_questions: wrongQuestions || 'Keine',
+    wrong_details: wrongDetails,
+    quiz: 'PSM1-Practice-80'
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 85)      { emoji='🏆'; title='Ausgezeichnet!';   sub='PSM-I-Niveau sicher erreicht – Prüfung angehen!';            color='#10B981'; }
+  else if (percent >= 70) { emoji='👍'; title='Sehr gut!';        sub='Starkes Fundament – Sprint-Logik und Events nochmals vertiefen.'; color='#7C3AED'; }
+  else if (percent >= 55) { emoji='📚'; title='Weiter üben!';     sub='Gute Basis – Advanced-Themen noch einmal durcharbeiten.';     color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!';  sub='Scrum Guide Abschnitte zu Sprint, Events & Artifacts lesen.';  color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},var(--accent))">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <div class="psm-hint">
+      <strong>💡 Exam Tip:</strong> Look carefully at the wording. Words like <em>only, always, must, ensure, responsible</em> vs <em>accountable</em> are frequent traps. For Best Possible Answer questions, choose the response that most completely and precisely reflects the Scrum Guide 2020. Target: <strong>85% = 68/80</strong>.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  if(timerInterval) clearInterval(timerInterval);
+  timeLeft = 50 * 60;
+  currentQuestion = 0; score = 0; selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
