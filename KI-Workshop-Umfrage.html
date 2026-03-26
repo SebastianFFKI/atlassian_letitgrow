@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KI-Workshop Feedback – Realschule am Eichberg</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap');
+
+  :root {
+    --neon-cyan:   #00F5FF;
+    --neon-pink:   #FF2D9B;
+    --neon-yellow: #FFE600;
+    --neon-green:  #00FF88;
+    --dark:        #060B14;
+    --dark2:       #0D1525;
+    --dark3:       #131E30;
+    --card-bg:     rgba(13,21,37,0.92);
+    --border:      rgba(0,245,255,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #e0eaff;
+  }
+
+  /* ─── GRID BACKGROUND ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── GLOW ORBS ─── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+  }
+  .orb1 { width:500px; height:500px; background:#FF2D9B; top:-150px; left:-100px; animation: drift1 12s ease-in-out infinite; }
+  .orb2 { width:400px; height:400px; background:#00F5FF; bottom:-100px; right:-80px; animation: drift2 15s ease-in-out infinite; }
+  .orb3 { width:300px; height:300px; background:#FFE600; top:40%; left:50%; transform:translate(-50%,-50%); animation: drift3 18s ease-in-out infinite; }
+
+  @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,-40px)} }
+  @keyframes drift3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-50%,-40%)} }
+
+  /* ─── MAIN WRAPPER ─── */
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    position: relative;
+  }
+  .header-badge {
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 20px;
+    padding: 4px 16px;
+    margin-bottom: 16px;
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 6px var(--neon-cyan); }
+    50%      { box-shadow: 0 0 18px var(--neon-cyan), 0 0 32px rgba(0,245,255,0.3); }
+  }
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  h1 .cool  { color: var(--neon-cyan); }
+  h1 .oder  { color: #fff; }
+  h1 .notcool { color: var(--neon-pink); }
+  .subtitle {
+    font-size: 15px;
+    color: rgba(180,200,240,0.7);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .robot-strip {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 16px;
+    font-size: 28px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+  /* ─── PROGRESS ─── */
+  .progress-wrap {
+    background: rgba(0,245,255,0.08);
+    border-radius: 8px;
+    height: 6px;
+    margin: 0 0 32px;
+    overflow: hidden;
+    border: 1px solid rgba(0,245,255,0.12);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+    border-radius: 8px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    width: 0%;
+  }
+  .progress-label {
+    text-align: right;
+    font-size: 11px;
+    color: rgba(0,245,255,0.6);
+    margin-top: 4px;
+    margin-bottom: 24px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ─── QUESTION CARD ─── */
+  .question-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    animation: fadeIn 0.5s ease both;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-yellow));
+    opacity: 0.7;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+  .q-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 2.5vw, 18px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 28px;
+  }
+
+  /* ─── EMOJI OPTION ROW ─── */
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .opt-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 12px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    min-width: 90px;
+    max-width: 120px;
+    flex: 1;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .opt-btn:hover {
+    border-color: var(--neon-cyan);
+    background: rgba(0,245,255,0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,245,255,0.15);
+  }
+  .opt-btn.selected {
+    border-color: var(--neon-pink);
+    background: rgba(255,45,155,0.15);
+    box-shadow: 0 0 20px rgba(255,45,155,0.3), inset 0 0 12px rgba(255,45,155,0.1);
+    transform: scale(1.05);
+  }
+  .opt-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 10px;
+    color: var(--neon-pink);
+    font-weight: 900;
+  }
+  .opt-emoji { font-size: 32px; line-height: 1; }
+  .opt-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(200,220,255,0.8);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .opt-btn.selected .opt-label { color: var(--neon-pink); }
+
+  /* Star rating for Q4 */
+  .star-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .star-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 80px;
+    flex: 1;
+    user-select: none;
+  }
+  .star-opt:hover { border-color: var(--neon-yellow); background: rgba(255,230,0,0.08); transform: translateY(-3px); }
+  .star-opt.selected { border-color: var(--neon-yellow); background: rgba(255,230,0,0.15); box-shadow: 0 0 16px rgba(255,230,0,0.25); transform: scale(1.05); }
+  .star-opt .stars { font-size: 16px; letter-spacing: 1px; }
+  .star-opt .star-emoji { font-size: 28px; }
+  .star-opt .star-label { font-size: 11px; font-weight: 600; color: rgba(200,220,255,0.7); text-align: center; }
+  .star-opt.selected .star-label { color: var(--neon-yellow); }
+
+  /* ─── SUBMIT BUTTON ─── */
+  .submit-section {
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+  .btn-submit {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--neon-pink), #9B00FF);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 24px rgba(255,45,155,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-submit::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    border-radius: inherit;
+  }
+  .btn-submit:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(255,45,155,0.5);
+  }
+  .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ─── THANK YOU SCREEN ─── */
+  #thankyou {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+    animation: fadeIn 0.6s ease both;
+  }
+  .ty-icon { font-size: 80px; margin-bottom: 24px; animation: bounce 0.8s ease 0.2s both; }
+  @keyframes bounce { 0%{transform:scale(0)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .ty-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--neon-green);
+    margin-bottom: 12px;
+    text-shadow: 0 0 20px rgba(0,255,136,0.4);
+  }
+  .ty-sub { font-size: 16px; color: rgba(180,210,255,0.7); }
+
+  /* ─── ERROR MSG ─── */
+  .error-msg {
+    color: #FF6B6B;
+    font-size: 12px;
+    margin-top: 8px;
+    text-align: center;
+    display: none;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 500px) {
+    .opt-btn { min-width: 70px; padding: 10px 6px; }
+    .opt-emoji { font-size: 26px; }
+    .opt-label { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="wrapper">
+
+  <!-- SURVEY FORM -->
+  <div id="survey-form">
+
+    <header>
+      <div class="header-badge">🤖 Realschule am Eichberg · 9. Klasse</div>
+      <h1>
+        <span class="cool">DEIN KI-WORKSHOP-</span><br>
+        <span class="cool">FEEDBACK: </span>
+        <span class="cool">COOL</span>
+        <span class="oder"> ODER </span>
+        <span class="notcool">NICHT COOL?</span>
+      </h1>
+      <p class="subtitle">Ganz anonym – mach den KI-Dozenten schlauer!</p>
+      <div class="robot-strip">🤖 🧠 💡 🤖</div>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label">0 / 5 beantwortet</div>
+
+    <!-- Q1: Wie cool war der KI-Workshop? -->
+    <div class="question-card" style="animation-delay:0.05s">
+      <div class="q-number">FRAGE 01 / 05</div>
+      <div class="q-title">🚀 Wie cool war der KI-Workshop?</div>
+      <div class="options">
+        <button class="opt-btn" data-q="1" data-v="5">
+          <span class="opt-emoji">😁</span>
+          <span class="opt-label">Mega! Besser als mein Lieblings-Game</span>
+        </button>
+        <button class="opt-btn" data-q="1" data-v="4">
+          <span class="opt-emoji">😎</span>
+          <span class="opt-label">Ziemlich cool</span>
+        </button>
+        <button class="opt-btn" data-q="1" data-v="3">
+          <span class="opt-emoji">😐</span>
+          <span class="opt-label">War okay</span>
+        </button>
+        <button class="opt-btn" data-q="1" data-v="2">
+          <span class="opt-emoji">😕</span>
+          <span class="opt-label">Geht so</span>
+        </button>
+        <button class="opt-btn" data-q="1" data-v="1">
+          <span class="opt-emoji">😞</span>
+          <span class="opt-label">Alexa hat mehr drauf</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-1">⚠ Bitte wähle eine Antwort!</div>
+    </div>
+
+    <!-- Q2: KI-Erklärungen verstanden -->
+    <div class="question-card" style="animation-delay:0.1s">
+      <div class="q-number">FRAGE 02 / 05</div>
+      <div class="q-title">🧠 Wie gut hast du die KI-Erklärungen verstanden?</div>
+      <div class="options">
+        <button class="opt-btn" data-q="2" data-v="5">
+          <span class="opt-emoji">😁</span>
+          <span class="opt-label">Perfekter Code</span>
+        </button>
+        <button class="opt-btn" data-q="2" data-v="4">
+          <span class="opt-emoji">😎</span>
+          <span class="opt-label">Ziemlich klar</span>
+        </button>
+        <button class="opt-btn" data-q="2" data-v="3">
+          <span class="opt-emoji">😐</span>
+          <span class="opt-label">War okay</span>
+        </button>
+        <button class="opt-btn" data-q="2" data-v="2">
+          <span class="opt-emoji">😕</span>
+          <span class="opt-label">Geht so</span>
+        </button>
+        <button class="opt-btn" data-q="2" data-v="1">
+          <span class="opt-emoji">😞</span>
+          <span class="opt-label">'Fehler im System'</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-2">⚠ Bitte wähle eine Antwort!</div>
+    </div>
+
+    <!-- Q3: KI-Dozent Unterhaltung -->
+    <div class="question-card" style="animation-delay:0.15s">
+      <div class="q-number">FRAGE 03 / 05</div>
+      <div class="q-title">🤖 Wie unterhaltsam war der KI-Dozent?</div>
+      <div class="options">
+        <button class="opt-btn" data-q="3" data-v="5">
+          <span class="opt-emoji">😁</span>
+          <span class="opt-label">Volle Emotionen & Humor</span>
+        </button>
+        <button class="opt-btn" data-q="3" data-v="4">
+          <span class="opt-emoji">😎</span>
+          <span class="opt-label">Lustig</span>
+        </button>
+        <button class="opt-btn" data-q="3" data-v="3">
+          <span class="opt-emoji">😐</span>
+          <span class="opt-label">War okay</span>
+        </button>
+        <button class="opt-btn" data-q="3" data-v="2">
+          <span class="opt-emoji">😕</span>
+          <span class="opt-label">Weniger witzig</span>
+        </button>
+        <button class="opt-btn" data-q="3" data-v="1">
+          <span class="opt-emoji">😞</span>
+          <span class="opt-label">Langweilig wie ein abgestürzter Server</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-3">⚠ Bitte wähle eine Antwort!</div>
+    </div>
+
+    <!-- Q4: Nützlichkeit Schulalltag (Sterne) -->
+    <div class="question-card" style="animation-delay:0.2s">
+      <div class="q-number">FRAGE 04 / 05</div>
+      <div class="q-title">🎒 Wie nützlich war's für deinen Schulalltag?</div>
+      <div class="star-row">
+        <button class="star-opt" data-q="4" data-v="5">
+          <span class="star-emoji">😁</span>
+          <span class="stars">⭐⭐⭐⭐⭐</span>
+          <span class="star-label">KI rettet meine Hausaufgaben</span>
+        </button>
+        <button class="star-opt" data-q="4" data-v="4">
+          <span class="star-emoji">😎</span>
+          <span class="stars">⭐⭐⭐⭐</span>
+          <span class="star-label">Ziemlich nützlich</span>
+        </button>
+        <button class="star-opt" data-q="4" data-v="3">
+          <span class="star-emoji">😐</span>
+          <span class="stars">⭐⭐⭐</span>
+          <span class="star-label">War okay</span>
+        </button>
+        <button class="star-opt" data-q="4" data-v="2">
+          <span class="star-emoji">😕</span>
+          <span class="stars">⭐⭐</span>
+          <span class="star-label">Zukunfts-Musik</span>
+        </button>
+        <button class="star-opt" data-q="4" data-v="1">
+          <span class="star-emoji">😞</span>
+          <span class="stars">⭐</span>
+          <span class="star-label">Brauch ich nicht</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-4">⚠ Bitte wähle eine Antwort!</div>
+    </div>
+
+    <!-- Q5: Gesamtnote KI-Dozent -->
+    <div class="question-card" style="animation-delay:0.25s">
+      <div class="q-number">FRAGE 05 / 05</div>
+      <div class="q-title">🏆 Deine Gesamtnote für den KI-Dozenten:</div>
+      <div class="star-row">
+        <button class="star-opt" data-q="5" data-v="5">
+          <span class="star-emoji">😁</span>
+          <span class="stars">⭐⭐⭐⭐⭐</span>
+          <span class="star-label">Meister-Programmierer</span>
+        </button>
+        <button class="star-opt" data-q="5" data-v="4">
+          <span class="star-emoji">😎</span>
+          <span class="stars">⭐⭐⭐⭐</span>
+          <span class="star-label">Sehr gut</span>
+        </button>
+        <button class="star-opt" data-q="5" data-v="3">
+          <span class="star-emoji">😐</span>
+          <span class="stars">⭐⭐⭐</span>
+          <span class="star-label">Gut</span>
+        </button>
+        <button class="star-opt" data-q="5" data-v="2">
+          <span class="star-emoji">😕</span>
+          <span class="stars">⭐⭐</span>
+          <span class="star-label">Genügend</span>
+        </button>
+        <button class="star-opt" data-q="5" data-v="1">
+          <span class="star-emoji">😞</span>
+          <span class="stars">⭐</span>
+          <span class="star-label">Firmware-Update nötig</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-5">⚠ Bitte wähle eine Antwort!</div>
+    </div>
+
+    <div class="submit-section">
+      <button class="btn-submit" id="btn-submit" onclick="submitSurvey()">
+        🚀 FEEDBACK ABSCHICKEN
+      </button>
+    </div>
+
+  </div><!-- /survey-form -->
+
+  <!-- THANK YOU -->
+  <div id="thankyou">
+    <div class="ty-icon">🤖</div>
+    <div class="ty-title">DANKE, DU LEGENDE!</div>
+    <p class="ty-sub">Dein Feedback macht den KI-Dozenten schlauer.<br>Mach weiter so! 💪</p>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+const WEBHOOK = 'https://hook.eu2.make.com/sh7bosjv5hqlogvogn8jr3vfcmvfbhod';
+
+const answers = { 1: null, 2: null, 3: null, 4: null, 5: null };
+
+const labels = {
+  1: { 5:'Mega – besser als Lieblings-Game', 4:'Ziemlich cool', 3:'War okay', 2:'Geht so', 1:'Alexa hat mehr drauf' },
+  2: { 5:'Perfekter Code', 4:'Ziemlich klar', 3:'War okay', 2:'Geht so', 1:'Fehler im System' },
+  3: { 5:'Volle Emotionen & Humor', 4:'Lustig', 3:'War okay', 2:'Weniger witzig', 1:'Langweilig wie abgestürzter Server' },
+  4: { 5:'KI rettet meine Hausaufgaben (5★)', 4:'Ziemlich nützlich (4★)', 3:'War okay (3★)', 2:'Zukunfts-Musik (2★)', 1:'Brauch ich nicht (1★)' },
+  5: { 5:'Meister-Programmierer (5★)', 4:'Sehr gut (4★)', 3:'Gut (3★)', 2:'Genügend (2★)', 1:'Firmware-Update nötig (1★)' },
+};
+
+// Click handler for all option buttons
+document.querySelectorAll('.opt-btn, .star-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const q = parseInt(btn.dataset.q);
+    const v = parseInt(btn.dataset.v);
+    answers[q] = v;
+
+    // Deselect siblings
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    // Hide error
+    document.getElementById('err-' + q).style.display = 'none';
+
+    updateProgress();
+  });
+});
+
+function updateProgress() {
+  const answered = Object.values(answers).filter(v => v !== null).length;
+  const pct = (answered / 5) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = answered + ' / 5 beantwortet';
+}
+
+function submitSurvey() {
+  // Validate
+  let valid = true;
+  for (let q = 1; q <= 5; q++) {
+    if (answers[q] === null) {
+      document.getElementById('err-' + q).style.display = 'block';
+      valid = false;
+    }
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Wird übertragen...';
+
+  const timestamp = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+  const avg = ((answers[1] + answers[2] + answers[3] + answers[4] + answers[5]) / 5).toFixed(1);
+
+  const payload = {
+    timestamp,
+    q1_workshop_cool:        answers[1],
+    q1_label:                labels[1][answers[1]],
+    q2_erklaerungen:         answers[2],
+    q2_label:                labels[2][answers[2]],
+    q3_lehrer_bot:           answers[3],
+    q3_label:                labels[3][answers[3]],
+    q4_nuetzlichkeit:        answers[4],
+    q4_label:                labels[4][answers[4]],
+    q5_gesamtnote:           answers[5],
+    q5_label:                labels[5][answers[5]],
+    durchschnitt:            avg,
+    klasse:                  '9. Klasse – Realschule am Eichberg',
+  };
+
+  // CORS-safe: POST with URLSearchParams (sends as form fields, not JSON blob)
+  const formData = new URLSearchParams();
+  Object.entries(payload).forEach(([k,v]) => formData.append(k, v));
+  fetch(WEBHOOK, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).catch(() => {});
+  setTimeout(showThanks, 2500);
+}
+
+function showThanks() {
+  document.getElementById('survey-form').style.display = 'none';
+  document.getElementById('thankyou').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
