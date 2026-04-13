@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CMM2 Tag 2 – Wissensquiz</title>
+  <style>
+    :root {
+      --primary: #1D6A4E;
+      --primary-light: #4CAF85;
+      --primary-dark: #134D38;
+      --accent: #F59E0B;
+      --success: #10B981;
+      --error: #EF4444;
+      --bg: #0A1A14;
+      --card: #112019;
+      --card2: #1A2E24;
+      --text: #EDFAF3;
+      --text-muted: #7DB89A;
+      --border: #2A4A38;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #061410 0%, #1D6A4E 55%, #F59E0B 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(20px,4vw,34px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:16px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    #progress-bar-container { background:var(--card); border-bottom:1px solid var(--border); padding:14px 24px; position:sticky; top:0; z-index:100; display:none; }
+    #exam-timer { text-align:right; font-size:14px; font-weight:700; color:var(--primary-light); margin-bottom:5px; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:52px; margin-bottom:16px; }
+    .intro-title { font-size:26px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .warning-box { background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.4); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:left; }
+    .warning-box strong { color:var(--accent); }
+    .warning-box p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-top:6px; }
+
+    .topic-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:24px; }
+    .topic-chip { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px; }
+    .topic-chip::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--primary-light); flex-shrink:0; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),#2D9E6E); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(29,106,78,0.45); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+    .difficulty-badge { display:inline-flex; align-items:center; gap:5px; border-radius:12px; padding:3px 10px; font-size:11px; font-weight:700; margin-top:8px; }
+    .diff-medium { background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:var(--accent); }
+    .diff-hard { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#F87171; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#1F3828; }
+    .option.selected { border-color:var(--primary); background:rgba(29,106,78,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .trap-hint { margin-top:10px; padding:10px; background:rgba(245,158,11,0.1); border-radius:8px; border:1px solid rgba(245,158,11,0.3); font-size:12px; color:var(--accent); }
+    .cmm-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),#2D9E6E); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .hint-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    .wrong-list { text-align:left; margin-top:24px; }
+    .wrong-item { background:var(--card2); border-left:4px solid var(--primary-light); border-radius:8px; padding:16px; margin-bottom:12px; }
+    .wrong-item-cat { font-size:10px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .wrong-item-q { color:var(--text); font-size:13px; font-weight:600; margin-bottom:8px; }
+    .wrong-item-ans { background:#0d3320; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px; color:#d1fae5; }
+    .wrong-item-exp { color:var(--text-muted); font-size:12px; line-height:1.7; }
+
+    @media (max-width:600px) {
+      .question-card { padding:18px; }
+      .option { padding:11px 12px; }
+      .q-text { font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">CMM2 · Tag 2 · Wissensquiz</div>
+    <h1>Vorteile, Nachteile & Trends</h1>
+    <p>15 anspruchsvolle Fragen – mit Praxis-Szenarien, Negativ-Formulierungen und typischen Prüfungsfallen</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 15 Fragen</div>
+      <div class="meta-chip">⚠️ Erhöhte Schwierigkeit</div>
+      <div class="meta-chip">⏱ ~20 Minuten</div>
+      <div class="meta-chip">🎓 CMM2 Zertifizierung</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container">
+  <div id="exam-timer">⏱ 20:00</div>
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 15</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">⚠️</div>
+    <h2 class="intro-title">CMM2 Tag 2 – Wissenscheck</h2>
+    <p class="intro-sub">Dieser Quiz ist bewusst anspruchsvoller als Tag 1. Prüfungsfallen, Negativ-Formulierungen und Szenarien, bei denen zwei Antworten plausibel klingen – aber nur eine wirklich stimmt.</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">15</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">13</div><div class="info-label">Punkte zum Bestehen</div></div>
+      <div class="info-card"><div class="info-num">87%</div><div class="info-label">Ziel</div></div>
+      <div class="info-card"><div class="info-num">20 min</div><div class="info-label">Zeit</div></div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ Achtung – erhöhte Schwierigkeit</strong>
+      <p>Viele Fragen haben Antwortoptionen, die teilweise richtig klingen, aber entscheidende Fehler enthalten. Lies jede Option vollständig durch, bevor du antwortest. Achte besonders auf Wörter wie <strong>„immer"</strong>, <strong>„nie"</strong>, <strong>„ausschließlich"</strong>, <strong>„primär"</strong> und <strong>„kein"</strong>.</p>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Themen heute</div>
+      <div class="topic-grid">
+        <div class="topic-chip">Vorteile Content Marketing</div>
+        <div class="topic-chip">Nachteile & Risiken</div>
+        <div class="topic-chip">Content Marketing vs. SEO</div>
+        <div class="topic-chip">ROI & Erfolgsmessung</div>
+        <div class="topic-chip">Trends 2025/2026</div>
+        <div class="topic-chip">KI-Trends & Chancen</div>
+        <div class="topic-chip">Video-First & UGC</div>
+        <div class="topic-chip">GreenBasket Szenarien</div>
+      </div>
+    </div>
+
+    <div class="reg-form">
+      <h3>📝 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Maria Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">Nach jeder Antwort erhältst du eine ausführliche Erklärung – inkl. warum die falschen Antworten verlockend, aber falsch sind.</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+  {
+    n: 1,
+    category: 'Vorteile – Prüfungsfalle',
+    difficulty: 'medium',
+    text: 'Ein Unternehmen argumentiert: „Content Marketing ist günstiger als klassische Werbung, weil man keine Mediakosten zahlt." Was ist an dieser Aussage problematisch?',
+    options: [
+      'A. Die Aussage ist vollständig korrekt – Content Marketing verursacht grundsätzlich keine Kosten',
+      'B. Die Aussage ist irreführend: Content Marketing spart Mediakosten, verursacht aber erhebliche Produktions- und Personalkosten für Erstellung, Pflege und Distribution',
+      'C. Die Aussage ist falsch – Content Marketing ist immer teurer als klassische Werbung',
+      'D. Die Aussage ist korrekt, weil organische Reichweite kostenlos ist'
+    ],
+    correct: [1],
+    explanation: 'Der häufigste Denkfehler: „Kein Mediabudget = günstig". Tatsächlich entstehen erhebliche Kosten für Texterstellung, Redaktion, Design, Videoerstellung, SEO-Tools und Distribution. Content Marketing kann sogar teurer sein als eine einzelne Anzeige – der Vorteil liegt im langfristigen ROI, nicht im Nullkostenansatz.',
+    trap: '⚠️ Falle: Option D klingt richtig, weil organische Reichweite tatsächlich keine direkte Mediagebühr kostet. Aber „kostenlos" ist organische Reichweite nie – Erstellung und Pflege verursachen immer Aufwand.',
+    ref: 'CMM2 Tag 2 · Vorteile & Nachteile von Content Marketing'
+  },
+  {
+    n: 2,
+    category: 'Nachteile – Szenario',
+    difficulty: 'hard',
+    text: 'GreenBasket startet einen Blog und veröffentlicht in den ersten 6 Monaten 3 Beiträge. Der Geschäftsführer ist enttäuscht: „Wir haben kaum Traffic und keine Neukunden." Was ist die präziseste Diagnose?',
+    options: [
+      'A. Content Marketing funktioniert für Bio-Unternehmen grundsätzlich nicht',
+      'B. 3 Beiträge in 6 Monaten sind für messbaren SEO-Effekt zu wenig – fehlende Konsistenz und zu geringe Content-Frequenz verhindern organischen Aufbau',
+      'C. Der Blog-Kanal ist falsch gewählt – GreenBasket sollte auf Social Media wechseln',
+      'D. Content Marketing braucht mindestens 5 Jahre, bevor erste Ergebnisse sichtbar werden'
+    ],
+    correct: [1],
+    explanation: 'Die präzise Diagnose: Konsistenz und Frequenz sind entscheidend. 3 Beiträge in 6 Monaten sind nicht genug, um Google-Vertrauen aufzubauen, Keyword-Autorität zu entwickeln oder eine Leserschaft zu binden. Empfehlung: mindestens 1 Beitrag pro Woche über 6 Monate, um erste organische Signale zu sehen.',
+    trap: '⚠️ Falle: Option D enthält einen Körnchen Wahrheit (CM braucht Zeit), aber „5 Jahre" ist übertrieben und falsch. Option C ist ein häufiger Kurzschluss – der Kanal ist nicht das Problem, die Frequenz ist es.',
+    ref: 'CMM2 Tag 2 · Nachteile von Content Marketing · Konsistenz als Erfolgsfaktor'
+  },
+  {
+    n: 3,
+    category: 'Content Marketing vs. SEO',
+    difficulty: 'hard',
+    text: 'Ein Kollege behauptet: „Content Marketing und SEO sind dasselbe – wer guten Content schreibt, rankt automatisch bei Google." Was ist richtig?',
+    options: [
+      'A. Vollständig korrekt – Google belohnt automatisch guten Content mit Top-Rankings',
+      'B. Richtig – beide Begriffe sind Synonyme und können austauschbar verwendet werden',
+      'C. Falsch – Content Marketing und SEO sind unterschiedliche Disziplinen, die sich gegenseitig verstärken, aber nicht identisch sind: SEO erfordert zusätzlich technische Optimierung, Keyword-Strategie und Linkaufbau',
+      'D. Falsch – Content Marketing hat keinen Einfluss auf SEO, beide Disziplinen wirken unabhängig voneinander'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing und SEO sind eng verzahnt, aber nicht identisch. SEO umfasst technische Optimierung (Ladezeit, Mobile, Struktur), Keyword-Strategie, interne Verlinkung und Backlink-Aufbau. Content Marketing liefert die Inhalte, die SEO zum Ranken braucht. Ohne strategische Keyword-Nutzung kann auch exzellenter Content unsichtbar bleiben.',
+    trap: '⚠️ Falle: Option A ist verführerisch, weil Google tatsächlich Qualität belohnt – aber nur, wenn auch technische und strategische SEO-Grundlagen stimmen.',
+    ref: 'CMM2 Tag 2 · Content Marketing & SEO · Synergieeffekte'
+  },
+  {
+    n: 4,
+    category: 'ROI & Messung – Prüfungsfalle',
+    difficulty: 'hard',
+    text: 'Der Marketing-Leiter von GreenBasket sagt: „Unser Content-Marketing-ROI ist negativ, weil wir mehr in Content investieren als wir direkt daraus verkaufen." Welche Aussage bewertet diese Aussage am treffendsten?',
+    options: [
+      'A. Korrekt – ein negativer ROI beweist, dass Content Marketing für GreenBasket nicht funktioniert',
+      'B. Korrekt – direkter Verkauf ist der einzig relevante KPI für Content Marketing',
+      'C. Zu kurzsichtig – Content Marketing erzeugt indirekten Wert (Markenbekanntheit, SEO-Autorität, Lead-Nurturing), der in reinen Verkaufszahlen nicht messbar ist. Ein isolierter Verkaufs-ROI greift zu kurz',
+      'D. Irrelevant – ROI ist im Content Marketing grundsätzlich nicht messbar'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing-ROI ist komplex und mehrdimensional. Neben direktem Umsatz entstehen indirekte Werte: höhere Markenbekanntheit, stärkere SEO-Autorität, geringere Kundenakquisitionskosten auf lange Sicht und verbessertes Lead-Nurturing. Wer nur direkten Verkauf misst, unterschätzt den wahren Wert – und bricht zu früh ab.',
+    trap: '⚠️ Falle: Option D klingt vorsichtig, ist aber falsch – ROI ist messbar, nur schwieriger als bei klassischer Werbung. Richtige KPIs: organischer Traffic, Newsletter-Abonnenten, Lead-Qualität, Time-on-Site.',
+    ref: 'CMM2 Tag 2 · ROI von Content Marketing · Indirekte Wertschöpfung'
+  },
+  {
+    n: 5,
+    category: 'Trends 2025/2026 – Differenzierung',
+    difficulty: 'medium',
+    text: 'Welcher der folgenden Trends beschreibt „Zero-Party Data" im Content Marketing korrekt?',
+    options: [
+      'A. Daten, die ohne Wissen der Nutzer gesammelt werden (Tracking)',
+      'B. Daten, die Nutzer freiwillig und aktiv mit einem Unternehmen teilen – z.B. durch Umfragen, Präferenz-Center oder Quiz',
+      'C. Drittanbieter-Daten, die von Datenbrokern gekauft werden',
+      'D. Automatisch generierte KI-Daten ohne menschliche Quelle'
+    ],
+    correct: [1],
+    explanation: 'Zero-Party Data sind Daten, die Nutzer bewusst und freiwillig teilen – im Gegensatz zu First-Party Data (Verhalten auf der eigenen Website), Third-Party Data (von Dritten) oder Zero-Knowledge-Tracking. Im Content Marketing werden Zero-Party Data durch Quiz, Präferenz-Abfragen oder personalisierte Newsletter-Optionen erhoben. Besonders relevant durch DSGVO und Cookie-Ablösung.',
+    trap: '⚠️ Falle: „Zero" klingt nach „nichts" oder „ohne Wissen" – aber gemeint ist „direkt vom Nutzer, ohne Umweg".',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · Datenstrategie & Zero-Party Data'
+  },
+  {
+    n: 6,
+    category: 'Trends – KI-Content',
+    difficulty: 'hard',
+    text: 'Eine Content-Managerin sagt: „Wir nutzen KI, um all unsere Blogartikel vollautomatisch zu generieren und direkt zu veröffentlichen – das spart 80% der Zeit." Was ist das Hauptrisiko dieser Strategie?',
+    options: [
+      'A. KI-generierter Content ist immer von schlechter Qualität und daher grundsätzlich unbrauchbar',
+      'B. Google erkennt KI-Content immer zuverlässig und bestraft ihn automatisch mit Ranking-Verlust',
+      'C. Vollautomatische Veröffentlichung ohne menschliche Qualitätssicherung riskiert faktische Fehler, fehlende Markenstimme, ethische Probleme und Glaubwürdigkeitsverlust bei der Zielgruppe',
+      'D. Es gibt kein Risiko – KI-Content ist aus rechtlicher und ethischer Sicht unbedenklich'
+    ],
+    correct: [2],
+    explanation: 'Das Kernrisiko ist fehlende menschliche Kontrolle: KI halluziniert Fakten, produziert generische Texte ohne echte Markenpersönlichkeit und kann ethisch problematische Formulierungen enthalten. GreenBaskets Authentizitätsversprechen ("Direkt vom Bauern") wäre durch KI-generierten Masseninhalt ohne Redaktion gefährdet.',
+    trap: '⚠️ Falle: Option B klingt plausibel – Google sagt, es bewertet Inhalte nach Qualität, nicht nach Herkunft. Der Schaden entsteht nicht durch Google-Strafen, sondern durch mangelnde Qualität und Glaubwürdigkeit.',
+    ref: 'CMM2 Tag 2 · KI im Content Marketing · Qualitätssicherung & Risiken'
+  },
+  {
+    n: 7,
+    category: 'Video-First Trend',
+    difficulty: 'medium',
+    text: 'Was bedeutet „Video-First Strategie" im Content Marketing konkret – und was ist dabei oft missverstanden?',
+    options: [
+      'A. Video-First bedeutet, ausschließlich Videos zu produzieren und alle anderen Formate aufzugeben',
+      'B. Video-First bedeutet, Video als primäres Content-Format zu priorisieren, andere Formate aber als ergänzende Kanäle zu behalten – und aus einem Video mehrere Formate zu repurposen (z.B. Reel → Blogpost → Newsletter-Teaser)',
+      'C. Video-First bedeutet, nur auf TikTok und YouTube aktiv zu sein',
+      'D. Video-First ist nur für B2C-Unternehmen relevant und funktioniert im B2B-Kontext nicht'
+    ],
+    correct: [1],
+    explanation: 'Video-First heißt nicht: nur Video. Es bedeutet, Video als Ausgangspunkt der Content-Strategie zu nutzen und daraus mehrere Formate abzuleiten (Repurposing). Ein Interview-Video wird zum Transcript-Blogpost, zum Reel-Ausschnitt, zum Podcast-Audio und zum Newsletter-Teaser. So entsteht maximale Effizienz.',
+    trap: '⚠️ Falle: „First" wird oft als „ausschließlich" interpretiert – gemeint ist „prioritär". Option D ist ein verbreitetes Vorurteil – LinkedIn-Videos und Webinare beweisen das Gegenteil im B2B.',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · Video-First & Content-Repurposing'
+  },
+  {
+    n: 8,
+    category: 'UGC – User Generated Content',
+    difficulty: 'hard',
+    text: 'GreenBasket möchte User Generated Content (UGC) einsetzen. Welche Aussage zum Einsatz von UGC ist korrekt?',
+    options: [
+      'A. UGC darf immer ohne Genehmigung des Erstellers für Marketingzwecke genutzt werden, weil es öffentlich gepostet wurde',
+      'B. UGC ist nur dann wertvoll, wenn es professionell produziert und aufwendig gestaltet ist',
+      'C. UGC steigert Glaubwürdigkeit, weil es von echten Kunden stammt – aber die Nutzung für Marketingzwecke erfordert immer die ausdrückliche Zustimmung des Erstellers',
+      'D. UGC hat keinen SEO-Wert und wirkt sich nicht positiv auf organische Sichtbarkeit aus'
+    ],
+    correct: [2],
+    explanation: 'UGC ist wertvoll, weil echte Kundenaussagen glaubwürdiger wirken als Marken-Content. Aber: Urheberrecht gilt auch für Social-Media-Posts. Öffentlich gepostete Inhalte dürfen nicht ohne Zustimmung für kommerzielle Zwecke weiterverwendet werden. GreenBasket muss Nutzer ausdrücklich um Erlaubnis bitten – am besten mit einer Hashtag-Kampagne und klaren Nutzungsbedingungen.',
+    trap: '⚠️ Falle: Option A ist ein häufiger rechtlicher Irrtum. "Öffentlich" bedeutet nicht "lizenziert für kommerzielle Nutzung".',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · UGC & Rechtliches'
+  },
+  {
+    n: 9,
+    category: 'Nachteile – Ressourcen',
+    difficulty: 'medium',
+    text: 'Welche der folgenden Aussagen über den Ressourcenbedarf von Content Marketing ist am präzisesten?',
+    options: [
+      'A. Content Marketing erfordert hauptsächlich kreatives Talent – technisches und strategisches Know-how ist weniger wichtig',
+      'B. Content Marketing kann vollständig durch KI-Tools automatisiert werden, wodurch kein menschliches Personal mehr benötigt wird',
+      'C. Content Marketing erfordert ein multidisziplinäres Ressourcenset: strategisches, kreatives, technisches und analytisches Know-how – sowie kontinuierliches Zeitinvestment über viele Monate',
+      'D. Content Marketing ist ressourceneffizienter als andere Marketingdisziplinen, weil Inhalte nur einmal erstellt werden müssen'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing braucht: Strategen (Was publizieren wir wann für wen?), Kreative (Texte, Bilder, Videos), Techniker (CMS, SEO, Analytics) und Analysten (Was funktioniert? Was nicht?). Der Irrtum, dass ein Beitrag „einmal erstellt" reicht, ignoriert Aktualisierungsbedarf, Distribution und kontinuierliche Optimierung.',
+    trap: '⚠️ Falle: Option D enthält einen Körnchen Wahrheit – Evergreen-Content hat lange Halbwertszeit. Aber "nur einmal erstellen" ist eine gefährliche Vereinfachung.',
+    ref: 'CMM2 Tag 2 · Nachteile von Content Marketing · Ressourcenbedarf'
+  },
+  {
+    n: 10,
+    category: 'Trends – Nachhaltigkeit',
+    difficulty: 'medium',
+    text: 'Warum ist „Nachhaltigkeit als Content-Strategie" ein besonders relevanter Trend für Unternehmen wie GreenBasket?',
+    options: [
+      'A. Weil Nachhaltigkeit ein gesetzlich vorgeschriebenes Marketingthema ist',
+      'B. Weil Nachhaltigkeitsthemen automatisch viral gehen und keine Strategie brauchen',
+      'C. Weil Zielgruppen zunehmend Unternehmen bevorzugen, die glaubwürdig über ihre Werte kommunizieren – und weil Greenwashing-Risiken bei fehlender Substanz erheblich sind',
+      'D. Weil Nachhaltigkeit ausschließlich für Bio- und Öko-Unternehmen relevant ist'
+    ],
+    correct: [2],
+    explanation: 'Nachhaltigkeitskommunikation ist ein zweischneidiges Schwert: Authentische, substanzielle Kommunikation (z.B. Einblicke in Lieferketten, Bauern-Portraits) stärkt Vertrauen enorm. Greenwashing – vage Nachhaltigkeitsversprechen ohne Belege – erzeugt Shitstorms und Vertrauensverlust. Für GreenBasket ist der Vorteil: Nachhaltigkeit ist nicht aufgesetzt, sondern Kerngeschäft.',
+    trap: '⚠️ Falle: Option D ist eine Ausrede, die konventionelle Unternehmen oft nutzen. Tatsächlich wird Nachhaltigkeit für alle Branchen relevanter.',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · Nachhaltigkeit als Content-Differenzierung'
+  },
+  {
+    n: 11,
+    category: 'Vorteile – Differenzierung',
+    difficulty: 'hard',
+    text: 'Ein Mitbewerber von GreenBasket schaltet täglich bezahlte Google-Anzeigen. GreenBasket setzt auf Content Marketing. Welche Aussage beschreibt den langfristigen strategischen Unterschied am korrektesten?',
+    options: [
+      'A. Der Mitbewerber hat den besseren Ansatz – bezahlte Anzeigen liefern garantierte Sichtbarkeit',
+      'B. GreenBasket hat den besseren Ansatz – Content Marketing ist immer effektiver als bezahlte Werbung',
+      'C. Beide Ansätze haben ihre Berechtigung: Bezahlte Anzeigen liefern kurzfristige, abschaltbare Sichtbarkeit; Content Marketing baut langfristige organische Autorität, die auch ohne laufendes Budget wirkt',
+      'D. Es gibt keinen strategischen Unterschied – beide Methoden erzielen identische Ergebnisse'
+    ],
+    correct: [2],
+    explanation: 'Weder der eine noch der andere Ansatz ist absolut überlegen. Paid Ads: sofortige Sichtbarkeit, aber teuer und weg sobald Budget endet. Content Marketing: langsamer Aufbau, aber nachhaltige Wirkung, die auch nach dem Aufhören der Investition weiterläuft. Klügste Strategie: beides kombinieren – Ads für kurzfristige Reichweite, Content für langfristige Autorität.',
+    trap: '⚠️ Falle: Beide Extrempositionen (A und B) sind falsch – das ist ein klassischer "best possible answer" Fragetyp der Zertifizierung.',
+    ref: 'CMM2 Tag 2 · Content Marketing vs. Paid Advertising · Strategischer Vergleich'
+  },
+  {
+    n: 12,
+    category: 'Trends – Personalisierung',
+    difficulty: 'hard',
+    text: 'Was ist der Kern des Trends „Personalisierung im Content Marketing" – und welche Herausforderung geht damit einher?',
+    options: [
+      'A. Personalisierung bedeutet, jeden Nutzer mit seinem Vornamen im Newsletter anzusprechen – mehr braucht es nicht',
+      'B. Personalisierung bedeutet, Content exakt auf Verhalten, Präferenzen und Journey-Phase des einzelnen Nutzers zuzuschneiden – erfordert aber erhebliche Dateninfrastruktur, DSGVO-Konformität und technische Reife',
+      'C. Personalisierung ist nur für große Konzerne mit Millionenbudgets umsetzbar – KMU können darauf verzichten',
+      'D. Personalisierung ist durch DSGVO in Deutschland vollständig verboten'
+    ],
+    correct: [1],
+    explanation: 'Echter Mehrwert durch Personalisierung entsteht, wenn Content zur richtigen Zeit, im richtigen Kanal, für die richtige Journey-Phase ausgespielt wird – nicht nur durch Namensfeld im Newsletter. Die Herausforderungen: Datenschutz (DSGVO), technische Infrastruktur (Marketing Automation) und Qualität der Daten. Auch KMU können einfache Formen nutzen: segmentierte Newsletter, verhaltensbasierte E-Mails.',
+    trap: '⚠️ Falle: Option D ist falsch – DSGVO verbietet keine Personalisierung, sie reguliert nur, wie Daten erhoben und verarbeitet werden dürfen.',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · Personalisierung & Datenstrategie'
+  },
+  {
+    n: 13,
+    category: 'Nachteile – Messbarkeit',
+    difficulty: 'medium',
+    text: 'Welche Aussage zur Messbarkeit von Content Marketing ist korrekt?',
+    options: [
+      'A. Content Marketing ist vollständig unmessbar – das ist sein größter Nachteil gegenüber bezahlter Werbung',
+      'B. Content Marketing ist genauso direkt messbar wie bezahlte Anzeigen – jeder Beitrag zeigt sofort seinen exakten Umsatzbeitrag',
+      'C. Content Marketing ist messbar, aber die Zuordnung (Attribution) von organischem Traffic zu Konversionen ist komplex – der Wert entfaltet sich oft über mehrere Touchpoints und Wochen hinweg',
+      'D. Nur der Traffic-Wert von Blogbeiträgen ist messbar, alle anderen Content-Formate können nicht gemessen werden'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing ist messbar – aber Multi-Touch-Attribution macht es komplex. Ein Nutzer liest einen Blogpost (1. Touchpoint), abonniert den Newsletter (2.), sieht eine Instagram-Story (3.) und kauft dann (4.). Welchem Touchpoint wird der Kauf zugeschrieben? Tools wie Google Analytics, UTM-Parameter und Marketing-Attribution-Modelle helfen, sind aber nie so direkt wie bei Paid Ads.',
+    trap: '⚠️ Falle: Option A ist ein verbreitetes Vorurteil. Messbarkeit ist möglich – die Herausforderung ist Attribution, nicht die Existenz von Metriken.',
+    ref: 'CMM2 Tag 2 · Nachteile Content Marketing · Messbarkeit & Attribution'
+  },
+  {
+    n: 14,
+    category: 'Trends – Content Recycling',
+    difficulty: 'medium',
+    text: 'Was ist der Unterschied zwischen „Content Recycling" und „Content Repurposing" – und welche Strategie empfiehlt sich für GreenBasket?',
+    options: [
+      'A. Content Recycling und Content Repurposing sind Synonyme ohne Bedeutungsunterschied',
+      'B. Content Recycling = denselben Inhalt unverändert erneut posten; Content Repurposing = bestehende Inhalte in neue Formate oder Kanäle überführen (z.B. Blogpost → Reel → Newsletter). Für GreenBasket empfiehlt sich Repurposing, um mit begrenzten Ressourcen maximale Kanalabdeckung zu erreichen',
+      'C. Content Recycling ist die modernere und effizientere Strategie, weil sie weniger Aufwand erfordert',
+      'D. Content Repurposing ist eine SEO-Black-Hat-Methode und sollte vermieden werden'
+    ],
+    correct: [1],
+    explanation: 'Der Unterschied ist entscheidend: Recycling = unverändert wiederverwenden (riskiert Qualitätsverlust und Follower-Ermüdung). Repurposing = gezielt transformieren: ein Bauern-Portrait-Video wird zum Blogpost, zum Instagram-Carousel, zum Podcast-Ausschnitt und zum Newsletter-Feature. Für GreenBasket (18 MA, knappes Budget) ist Repurposing der effizienteste Hebel.',
+    trap: '⚠️ Falle: Option D ist komplett falsch – Repurposing ist eine empfohlene Best Practice, kein SEO-Trick.',
+    ref: 'CMM2 Tag 2 · Trends 2025/2026 · Content Recycling vs. Repurposing'
+  },
+  {
+    n: 15,
+    category: 'Gesamtstrategie – Prüfungsfalle',
+    difficulty: 'hard',
+    text: 'Eine Unternehmensberaterin empfiehlt GreenBasket: „Content Marketing hat so viele Vorteile, dass ihr komplett auf bezahlte Werbung verzichten solltet." Was ist die beste Antwort auf diese Empfehlung?',
+    options: [
+      'A. Zustimmung – Content Marketing ist immer der bessere Ansatz und paid Werbung ist Ressourcenverschwendung',
+      'B. Ablehnung – bezahlte Werbung ist immer wirksamer als Content Marketing und sollte priorisiert werden',
+      'C. Differenzierung: Content Marketing ist für GreenBasket als langfristiges Fundament ideal, aber vollständiger Verzicht auf bezahlte Werbung kann kritisch sein – besonders in der Startup-Phase, wo organischer Aufbau Zeit braucht und schnelle Marktpräsenz gefragt ist',
+      'D. Die Empfehlung ist korrekt, da GreenBasket als nachhaltiges Unternehmen keine bezahlte Werbung einsetzen sollte'
+    ],
+    correct: [2],
+    explanation: 'Keine Entweder-Oder-Entscheidung: Für GreenBasket als Startup ist ein Content-First-Ansatz sinnvoll, da er zur Authentizität der Marke passt. Aber in der Aufbauphase kann gezieltes Paid Advertising (z.B. Social Media Ads auf spezifische Zielgruppen) helfen, schneller Bekanntheit aufzubauen und den Content zu boosten. Reife Unternehmen mit starker organischer Basis können Paid Ads reduzieren – Startups sollten beide Kanäle nutzen.',
+    trap: '⚠️ Falle: Option D klingt für ein Nachhaltigkeitsunternehmen stimmig – aber "keine Werbung" ist eine Geschäftsstrategie, keine ethische Pflicht. Auch Bio-Unternehmen schalten Ads.',
+    ref: 'CMM2 Tag 2 · Content Marketing im Marketingmix · Integrierte Strategie'
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let timerInterval = null;
+let timeLeft = 20 * 60;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startTimer() {
+  const el = document.getElementById('exam-timer');
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    if (el) {
+      el.textContent = '⏱ ' + m + ':' + String(s).padStart(2, '0');
+      if (timeLeft <= 120) el.style.color = '#FF6B6B';
+      else if (timeLeft <= 300) el.style.color = '#FFA500';
+      else el.style.color = '#4CAF85';
+    }
+    if (timeLeft <= 0) { clearInterval(timerInterval); showResult(); }
+  }, 1000);
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  currentQuestion = 0;
+  startTimer();
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const diffBadge = q.difficulty === 'hard'
+    ? '<div class="difficulty-badge diff-hard">🔴 Anspruchsvoll</div>'
+    : '<div class="difficulty-badge diff-medium">🟡 Mittel</div>';
+
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('quiz-screen').innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+          ${diffBadge}
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  document.querySelectorAll('.option').forEach(o => {
+    o.classList.remove('selected');
+    o.querySelector('.option-marker').textContent = ['A','B','C','D'][parseInt(o.dataset.index)];
+  });
+  selectedOptions.clear();
+  selectedOptions.add(idx);
+  const opt = document.querySelector(`.option[data-index="${idx}"]`);
+  opt.classList.add('selected');
+  opt.querySelector('.option-marker').textContent = '✓';
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions);
+  const isCorrect = selectedArr.length === q.correct.length && selectedArr.every(i => correctSet.has(i));
+  if (isCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+    if (correctSet.has(idx)) { opt.classList.add('correct'); marker.textContent = '✓'; }
+    else if (selectedOptions.has(idx) && !correctSet.has(idx)) { opt.classList.add('wrong'); marker.textContent = '✗'; }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  const correctLabel = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isCorrect ? '✅ Richtig!' : '❌ Leider falsch'}
+    </div>
+    ${!isCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort: ${correctLabel}</div>` : ''}
+    <div>${q.explanation}</div>
+    ${q.trap ? `<div class="trap-hint">${q.trap}</div>` : ''}
+    <div class="cmm-ref"><strong>📖 CMM2 Referenz:</strong> ${q.ref}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isCorrect) {
+    wrongAnswers.push({
+      frage: q.text.substring(0, 100) + (q.text.length > 100 ? '...' : ''),
+      kategorie: q.category,
+      richtigeAntwort: q.correct.map(i => q.options[i]).join(' / '),
+      erklaerung: q.explanation
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  const wrongDetails = wrongAnswers.length === 0
+    ? '<p style="color:#10B981;font-weight:700;font-size:15px;">🎉 Perfekt! Alle Fragen richtig – beeindruckend bei diesem Schwierigkeitsgrad!</p>'
+    : wrongAnswers.map((w, i) => `
+        <div class="wrong-item">
+          <div class="wrong-item-cat">${i + 1}. ${w.kategorie}</div>
+          <div class="wrong-item-q">❓ ${w.frage}</div>
+          <div class="wrong-item-ans">✅ Richtige Antwort: ${w.richtigeAntwort}</div>
+          <div class="wrong-item-exp">💡 ${w.erklaerung}</div>
+        </div>
+      `).join('');
+
+  const wrongCats = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const timestamp = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName, email: userEmail,
+    quiz: 'CMM2-Tag2-VorteileNachteile-Trends',
+    score, total, percent: percent + '%', timestamp,
+    wrong_categories: wrongCats || 'Keine',
+    wrong_details: wrongDetails
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 87)      { emoji='🏆'; title='Ausgezeichnet!'; sub='Hervorragend bei erhöhtem Schwierigkeitsgrad! Du erkennst auch subtile Prüfungsfallen sicher.'; color='#10B981'; }
+  else if (percent >= 67) { emoji='👍'; title='Gut gemacht!'; sub='Solide Leistung – gehe die falsch beantworteten Themen nochmal durch. Achte besonders auf die "⚠️ Falle"-Hinweise.'; color='#1D6A4E'; }
+  else if (percent >= 47) { emoji='📚'; title='Weiter üben!'; sub='Die Prüfungsfallen haben zugeschlagen! Lies die Erklärungen sorgfältig durch – besonders zu Messbarkeit, ROI und UGC.'; color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!'; sub='Tag-2-Inhalte nochmal in Ruhe durcharbeiten. Die Fallen werden beim zweiten Mal sichtbarer!'; color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},#F59E0B)">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet und im Kurs-Sheet erfasst.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <div class="wrong-list">${wrongDetails}</div>
+    <br>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <br><br>
+    <div class="hint-box">
+      <strong>💡 Prüfungs-Tipp für Tag 2:</strong> In der Zertifizierungsprüfung gibt es viele Fragen, bei denen zwei Antworten <em>teilweise</em> richtig klingen. Suche immer nach der Antwort, die <em>vollständig</em> und <em>ohne Einschränkung</em> korrekt ist. Absolute Aussagen mit „immer", „nie" oder „ausschließlich" sind fast immer falsch.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  timeLeft = 20 * 60;
+  currentQuestion = 0; score = 0;
+  selectedOptions = new Set(); answered = false;
+  shuffledQuestions = shuffle(questions); wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  startTimer();
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch(e) { console.warn('Webhook nicht erreichbar:', e); }
+}
+</script>
+</body>
+</html>
