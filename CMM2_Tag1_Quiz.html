@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CMM2 Tag 1 – Wissensquiz</title>
+  <style>
+    :root {
+      --primary: #1D6A4E;
+      --primary-light: #4CAF85;
+      --primary-dark: #134D38;
+      --accent: #F59E0B;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --bg: #0A1A14;
+      --card: #112019;
+      --card2: #1A2E24;
+      --text: #EDFAF3;
+      --text-muted: #7DB89A;
+      --border: #2A4A38;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #061410 0%, #1D6A4E 55%, #F59E0B 100%);
+      padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header-badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:20px; padding:4px 16px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .header h1 { font-size: clamp(20px,4vw,34px); font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .header p { font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; }
+    .header-meta { display:flex; gap:16px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .meta-chip { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 14px; font-size:13px; display:flex; align-items:center; gap:6px; }
+
+    #progress-bar-container { background:var(--card); border-bottom:1px solid var(--border); padding:14px 24px; position:sticky; top:0; z-index:100; display:none; }
+    #exam-timer { text-align:right; font-size:14px; font-weight:700; color:var(--primary-light); margin-bottom:5px; padding-right:4px; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13px; font-weight:600; }
+    .live-score { color:var(--primary-light); }
+    .progress-bar { height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+
+    .main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* INTRO */
+    #intro-screen { text-align:center; padding:20px 0; }
+    .intro-icon { font-size:52px; margin-bottom:16px; }
+    .intro-title { font-size:26px; font-weight:800; margin-bottom:10px; }
+    .intro-sub { color:var(--text-muted); font-size:15px; line-height:1.6; max-width:520px; margin:0 auto 24px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:28px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center; }
+    .info-num { font-size:28px; font-weight:900; color:var(--primary-light); }
+    .info-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+    .topic-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:24px; }
+    .topic-chip { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px; }
+    .topic-chip::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--primary-light); flex-shrink:0; }
+
+    .reg-form { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:460px; margin:0 auto; text-align:left; }
+    .reg-form h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+    .reg-form p { color:var(--text-muted); font-size:13px; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-muted); }
+    .form-group input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; outline:none; transition:border-color 0.2s; }
+    .form-group input:focus { border-color:var(--primary-light); }
+    .form-group input::placeholder { color:var(--text-muted); }
+    .btn-register { width:100%; background:linear-gradient(135deg,var(--primary),#2D9E6E); color:white; padding:13px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:6px; transition:all 0.2s; }
+    .btn-register:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(29,106,78,0.45); }
+    .form-error { color:var(--error); font-size:12px; margin-top:8px; display:none; }
+
+    /* QUESTION */
+    .question-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px; margin-bottom:20px; transition:border-color 0.3s; }
+    .question-card.answered-correct { border-color:var(--success); }
+    .question-card.answered-wrong { border-color:var(--error); }
+    .question-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .q-number { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+    .q-meta { flex:1; }
+    .q-category { font-size:11px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .q-text { font-size:16px; font-weight:600; line-height:1.5; }
+
+    .options { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; cursor:pointer; transition:all 0.2s; user-select:none; }
+    .option:hover:not(.disabled) { border-color:var(--primary-light); background:#1F3828; }
+    .option.selected { border-color:var(--primary); background:rgba(29,106,78,0.2); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,0.15); }
+    .option.wrong { border-color:var(--error); background:rgba(239,68,68,0.15); }
+    .option.show-correct { border-color:var(--success); background:rgba(16,185,129,0.1); }
+    .option.disabled { cursor:not-allowed; }
+    .option-marker { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:all 0.2s; color:var(--text-muted); }
+    .option.selected .option-marker { background:var(--primary); border-color:var(--primary); color:white; }
+    .option.correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option.wrong .option-marker { background:var(--error); border-color:var(--error); color:white; }
+    .option.show-correct .option-marker { background:var(--success); border-color:var(--success); color:white; }
+    .option span { font-size:14px; line-height:1.4; flex:1; }
+
+    .feedback { display:none; padding:16px; border-radius:12px; font-size:13px; line-height:1.7; margin-bottom:16px; }
+    .feedback.show { display:block; }
+    .feedback.correct-fb { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+    .feedback.wrong-fb { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); }
+    .feedback-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .correct-title { color:var(--success); }
+    .wrong-title { color:var(--error); }
+    .cmm-ref { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted); }
+
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { padding:11px 22px; border-radius:10px; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+    .btn-check { background:var(--primary); color:white; }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-check:not(:disabled):hover { background:var(--primary-dark); }
+    .btn-next { background:rgba(255,255,255,0.08); color:var(--text); display:none; border:1px solid var(--border); }
+    .btn-next.show { display:block; }
+    .btn-next:hover { background:rgba(255,255,255,0.15); }
+
+    /* RESULT */
+    #result-screen { display:none; text-align:center; padding:20px 0; }
+    .result-circle { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .result-percent { font-size:34px; font-weight:900; }
+    .result-label { font-size:13px; opacity:0.8; }
+    .result-title { font-size:26px; font-weight:800; margin-bottom:8px; }
+    .result-sub { color:var(--text-muted); font-size:14px; max-width:480px; margin:0 auto 24px; line-height:1.6; }
+    .result-breakdown { display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+    .breakdown-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; min-width:90px; }
+    .breakdown-num { font-size:28px; font-weight:900; }
+    .breakdown-num.green { color:var(--success); }
+    .breakdown-num.red { color:var(--error); }
+    .breakdown-num.blue { color:var(--primary-light); }
+    .breakdown-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .btn-restart { background:linear-gradient(135deg,var(--primary),#2D9E6E); color:white; padding:14px 32px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; margin-bottom:24px; }
+    .hint-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:left; font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    .wrong-list { text-align:left; margin-top:24px; }
+    .wrong-item { background:var(--card2); border-left:4px solid var(--primary-light); border-radius:8px; padding:16px; margin-bottom:12px; }
+    .wrong-item-cat { font-size:10px; font-weight:700; color:var(--primary-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .wrong-item-q { color:var(--text); font-size:13px; font-weight:600; margin-bottom:8px; }
+    .wrong-item-ans { background:#0d3320; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px; color:#d1fae5; }
+    .wrong-item-exp { color:var(--text-muted); font-size:12px; line-height:1.7; }
+
+    @media (max-width:600px) {
+      .question-card { padding:18px; }
+      .option { padding:11px 12px; }
+      .q-text { font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="position:relative;z-index:1;">
+    <div class="header-badge">CMM2 · Tag 1 · Wissensquiz</div>
+    <h1>Content Marketing Grundlagen</h1>
+    <p>15 Fragen zu Content Marketing, Marketingmix, Trends 2025/2026 und KI-Einführung</p>
+    <div class="header-meta">
+      <div class="meta-chip">📋 15 Fragen</div>
+      <div class="meta-chip">⏱ ~15 Minuten</div>
+      <div class="meta-chip">🎓 CMM2 Zertifizierung</div>
+      <div class="meta-chip">✅ Sofort-Feedback</div>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-container">
+  <div id="exam-timer">⏱ 15:00</div>
+  <div class="progress-container">
+    <div class="progress-top">
+      <span id="progress-label">Frage 1 von 15</span>
+      <span class="live-score" id="live-score">Punkte: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-icon">🌿</div>
+    <h2 class="intro-title">CMM2 Tag 1 – Wissenscheck</h2>
+    <p class="intro-sub">15 Fragen zu den Kernthemen von Tag 1. Nach jeder Antwort erhältst du eine fachliche Erklärung mit Prüfungsreferenz. Dein Ergebnis wird automatisch erfasst.</p>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-num">15</div><div class="info-label">Fragen</div></div>
+      <div class="info-card"><div class="info-num">13</div><div class="info-label">Punkte zum Bestehen</div></div>
+      <div class="info-card"><div class="info-num">87%</div><div class="info-label">Ziel</div></div>
+      <div class="info-card"><div class="info-num">15 min</div><div class="info-label">Zeit</div></div>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Themen heute</div>
+      <div class="topic-grid">
+        <div class="topic-chip">Content Marketing Definition</div>
+        <div class="topic-chip">Push vs. Pull Prinzip</div>
+        <div class="topic-chip">Marketingmix 4P & 7P</div>
+        <div class="topic-chip">Vorteile & Nachteile</div>
+        <div class="topic-chip">Trends 2025/2026</div>
+        <div class="topic-chip">KI-Grundlagen & Prompts</div>
+        <div class="topic-chip">KI-Ethik</div>
+        <div class="topic-chip">GreenBasket Praxisbezug</div>
+      </div>
+    </div>
+
+    <div class="reg-form">
+      <h3>📝 Deine Angaben</h3>
+      <p>Für deine persönliche Auswertung und die Erfassung im Kurs-Sheet.</p>
+      <div class="form-group">
+        <label for="input-name">Vollständiger Name *</label>
+        <input type="text" id="input-name" placeholder="z.B. Maria Mustermann" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">E-Mail-Adresse *</label>
+        <input type="email" id="input-email" placeholder="deine@email.de" autocomplete="email" />
+      </div>
+      <div class="form-error" id="form-error">Bitte fülle alle Felder korrekt aus.</div>
+      <button class="btn-register" onclick="validateAndStart()">Quiz starten ▶</button>
+    </div>
+    <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">Nach jeder Antwort erhältst du eine Erklärung mit Prüfungsreferenz zum Webmasters Europe Lehrplan.</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" style="display:none;"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu2.make.com/abn6fux6rdv49r2jtkp6m5dk9em2b9pp';
+
+const questions = [
+  {
+    n: 1,
+    category: 'Content Marketing Definition',
+    text: 'Was ist die präziseste Definition von Content Marketing nach dem Content Marketing Institute?',
+    options: [
+      'A. Bezahlte Werbeanzeigen in sozialen Medien schalten, um schnelle Reichweite zu kaufen',
+      'B. Wertvolle, relevante Inhalte erstellen und distribuieren, um eine klar definierte Zielgruppe anzuziehen und langfristig zu binden',
+      'C. Das Produkt durch Rabattaktionen und Sonderangebote in allen Kanälen zu bewerben',
+      'D. Newsletter an bestehende Kunden versenden, um Upselling zu betreiben'
+    ],
+    correct: [1],
+    explanation: 'Content Marketing zielt auf das Erstellen und Verteilen wertvoller, relevanter Inhalte – nicht auf direkte Werbung oder Verkaufsaktionen. Der Fokus liegt auf dem Aufbau einer Beziehung zur Zielgruppe durch Mehrwert.',
+    ref: 'CMM2 Tag 1 · Bausteininhalt: Content Marketing in den Marketingmix integrieren'
+  },
+  {
+    n: 2,
+    category: 'Push vs. Pull Prinzip',
+    text: 'Was ist der entscheidende Unterschied zwischen Content Marketing (Pull) und klassischer Werbung (Push)?',
+    options: [
+      'A. Content Marketing ist immer kostenlos, klassische Werbung ist kostenpflichtig',
+      'B. Beim Push-Prinzip wird die Werbebotschaft aktiv zum Konsumenten geschickt; beim Pull-Prinzip kommt der Konsument selbst über wertvolle Inhalte zum Unternehmen',
+      'C. Content Marketing funktioniert nur digital, klassische Werbung nur offline',
+      'D. Push-Marketing ist langfristig immer effizienter als Pull-Marketing'
+    ],
+    correct: [1],
+    explanation: 'Push = Werbebotschaft geht zum Konsumenten (z.B. TV-Spot, Banner, Kaltakquise). Pull = Der Konsument kommt aktiv durch nützliche Inhalte (z.B. SEO-Blogpost, Ratgeber, Tutorial). Content Marketing ist Pull-Marketing par excellence.',
+    ref: 'CMM2 Tag 1 · Content Marketing vs. klassische Werbung'
+  },
+  {
+    n: 3,
+    category: 'Marketingmix 4P',
+    text: 'In welchem der klassischen 4P des Marketingmix ist Content Marketing primär einzuordnen?',
+    options: [
+      'A. Product – weil Content das Produkt verbessert',
+      'B. Price – weil kostenloser Content den wahrgenommenen Preis beeinflusst',
+      'C. Promotion (Kommunikationspolitik) – weil Content Zielgruppen informiert, überzeugt und bindet',
+      'D. Place (Distributionspolitik) – weil Content über verschiedene Kanäle verteilt wird'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing gehört zur Promotion (Kommunikationspolitik). Es zielt darauf ab, Zielgruppen zu informieren, zu überzeugen und langfristig zu binden – nicht primär Produkt, Preis oder Vertrieb zu gestalten.',
+    ref: 'CMM2 Tag 1 · Content Marketing im Marketingmix'
+  },
+  {
+    n: 4,
+    category: 'Content Marketing Definition',
+    text: 'Welche Aussage beschreibt KEIN Merkmal von erfolgreichem Content Marketing?',
+    options: [
+      'A. Die Inhalte bieten der Zielgruppe echten Mehrwert ohne sofortige Kaufaufforderung',
+      'B. Die Inhalte werden langfristig und strategisch geplant',
+      'C. Jeder Inhalt enthält eine direkte Aufforderung, sofort ein Produkt zu kaufen',
+      'D. Die Inhalte sind auf die spezifischen Bedürfnisse der Zielgruppe ausgerichtet'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing vermeidet aggressive Kaufaufforderungen. Der Ansatz ist: informieren, inspirieren und Vertrauen aufbauen. Der Kauf soll als natürliche Konsequenz entstehen – nicht erzwungen werden. Direkte Kaufappelle gehören zur klassischen Werbung.',
+    ref: 'CMM2 Tag 1 · Merkmale erfolgreichen Content Marketings'
+  },
+  {
+    n: 5,
+    category: 'GreenBasket Praxisbezug',
+    text: 'GreenBasket GmbH ist ein Hamburger Bio-Online-Marktplatz mit 18 Mitarbeitenden. Welche Content-Marketing-Maßnahme eignet sich in der Awareness-Phase am besten?',
+    options: [
+      'A. Direkte E-Mail-Kampagnen an gekaufte Adresslisten mit Sonderangeboten',
+      'B. SEO-optimierte Blogbeiträge über regionale Landwirtschaft und Bio-Siegel, die über Suchmaschinen gefunden werden',
+      'C. Print-Anzeigen in Hamburger Stadtmagazinen',
+      'D. Ausschließlich Produktbeschreibungen im eigenen Online-Shop optimieren'
+    ],
+    correct: [1],
+    explanation: 'In der Awareness-Phase geht es darum, erstmalig gefunden zu werden. SEO-optimierte Blogbeiträge zu relevanten Themen (Bio, Regionalität, Nachhaltigkeit) ziehen potenzielle Kunden organisch an – ideal für ein Startup mit begrenztem Werbebudget.',
+    ref: 'CMM2 Tag 1 · Praxisprojekt GreenBasket GmbH · Awareness-Phase'
+  },
+  {
+    n: 6,
+    category: 'Content Marketing Vorteile',
+    text: 'Welcher der folgenden Punkte ist ein strategischer Vorteil von Content Marketing gegenüber klassischer Werbung?',
+    options: [
+      'A. Sofortige Reichweite ohne jegliche Vorlaufzeit',
+      'B. Langfristiger Vertrauensaufbau und organische Sichtbarkeit durch SEO',
+      'C. Geringerer inhaltlicher Aufwand pro Einzelmaßnahme',
+      'D. Jeder Inhalt erzielt direkte und sofort messbare Verkaufskonversionen'
+    ],
+    correct: [1],
+    explanation: 'Content Marketing baut langfristiges Vertrauen auf und erzeugt organische Sichtbarkeit durch SEO. Klassische Werbung ist oft schneller, aber teurer, schnell vergessen und baut keine nachhaltige Beziehung zur Zielgruppe auf.',
+    ref: 'CMM2 Tag 1 · Vorteile von Content Marketing'
+  },
+  {
+    n: 7,
+    category: 'Content Marketing Nachteile',
+    text: 'Was ist ein typischer Nachteil von Content Marketing, den du in der Praxis kennen musst?',
+    options: [
+      'A. Es ist grundsätzlich zu teuer für kleine und mittlere Unternehmen',
+      'B. Ergebnisse zeigen sich erst mittel- bis langfristig – Content Marketing ist eine strategische Investition, keine Sofortmaßnahme',
+      'C. Es kann ausschließlich für B2C-Unternehmen eingesetzt werden',
+      'D. Es erfordert immer externe Agenturen und ist nicht intern umsetzbar'
+    ],
+    correct: [1],
+    explanation: 'Content Marketing ist eine Investition mit Vorlaufzeit. Wer schnelle Ergebnisse erwartet, wird enttäuscht. Der ROI zeigt sich oft erst nach 6–18 Monaten konsequenter Arbeit – ein häufiger Grund für vorzeitigen Abbruch.',
+    ref: 'CMM2 Tag 1 · Nachteile von Content Marketing'
+  },
+  {
+    n: 8,
+    category: 'KI-Grundlagen',
+    text: 'Wofür steht „KI" im Kontext des Content Marketings und was beschreibt den Begriff am besten?',
+    options: [
+      'A. Kommunikationsintegration – ein Modell zur Vernetzung verschiedener Marketingkanäle',
+      'B. Künstliche Intelligenz – softwarebasierte Systeme, die auf Basis großer Datenmengen trainiert wurden und Texte, Bilder und Analysen generieren können',
+      'C. Kreativitätsindex – eine Kennzahl zur Messung der Content-Qualität',
+      'D. Kanalintegration – ein Ansatz für Multi-Channel-Marketing-Strategien'
+    ],
+    correct: [1],
+    explanation: 'KI steht für Künstliche Intelligenz. Im Content Marketing unterstützen Tools wie ChatGPT, Gemini und Perplexity bei Recherche, Textentwürfen und Ideengenerierung. Sie sind trainierte Sprachmodelle, keine Suchmaschinen und keine Allwisser.',
+    ref: 'CMM2 Tag 1 · KI-Einführung · KI im Content Marketing'
+  },
+  {
+    n: 9,
+    category: 'KI-Praxis: Prompting',
+    text: 'Was ist der wichtigste Unterschied zwischen einem schlechten und einem guten KI-Prompt?',
+    options: [
+      'A. Ein guter Prompt ist immer kürzer – KI braucht keine Details',
+      'B. Ein guter Prompt enthält Kontext, Zielgruppe, Ton und konkretes Ziel; ein schlechter Prompt ist vage und allgemein',
+      'C. Ein guter Prompt fragt immer auf Englisch, weil KI dann bessere Ergebnisse liefert',
+      'D. Ein guter Prompt enthält immer eine direkte Frage, niemals eine Anweisung'
+    ],
+    correct: [1],
+    explanation: 'Kontext, Rolle, Zielgruppe, Ton und Ziel machen den Unterschied. Schlechter Prompt: "Schreib was über Bio". Guter Prompt: "Du bist Content Manager für GreenBasket. Schreibe eine 150-Wörter-Instagram-Caption für Nachhaltige Nora (36, Lehrerin, Bio-Käuferin). Ton: warm, persönlich, ohne Werbesprache."',
+    ref: 'CMM2 Tag 1 · KI-Praxis · Prompt-Struktur'
+  },
+  {
+    n: 10,
+    category: 'Content Marketing Beispiele',
+    text: 'Welche der folgenden Maßnahmen ist ein Beispiel für Content Marketing?',
+    options: [
+      'A. Ein GreenBasket-Werbebanner erscheint auf einer Nachrichtenwebseite',
+      'B. GreenBasket schaltet einen 30-Sekunden-TV-Spot zur Primetime',
+      'C. GreenBasket veröffentlicht einen Blogpost „Was bedeuten Bio-Siegel wirklich?" der über Google gefunden wird',
+      'D. GreenBasket verschickt gedruckte Werbebriefe mit Rabattcoupon an Hamburger Haushalte'
+    ],
+    correct: [2],
+    explanation: 'Der Blogpost ist klassisches Content Marketing: Er bietet echten Informationswert, zieht Suchende organisch an und baut Vertrauen auf – ohne direkte Kaufaufforderung. Banner, TV-Spot und Werbebrief sind klassische Push-Werbung.',
+    ref: 'CMM2 Tag 1 · Content Marketing Beispiele'
+  },
+  {
+    n: 11,
+    category: 'Marketingmix 7P',
+    text: 'Das erweiterte Marketingmix-Modell für Dienstleistungen umfasst 7P statt 4P. Welche drei zusätzlichen Ps kommen beim 7P-Modell hinzu?',
+    options: [
+      'A. Profit, Placement, Publicity',
+      'B. People (Personal), Process (Prozesse), Physical Evidence (physisches Erscheinungsbild)',
+      'C. Performance, Purpose, Partnership',
+      'D. Presentation, Persuasion, Positioning'
+    ],
+    correct: [1],
+    explanation: 'Das 7P-Modell für Dienstleistungen erweitert die klassischen 4P (Product, Price, Place, Promotion) um: People (Mitarbeitende), Process (Dienstleistungsprozesse) und Physical Evidence (physisches Erscheinungsbild, z.B. Verpackung, Webseite).',
+    ref: 'CMM2 Tag 1 · Marketingmix 7P'
+  },
+  {
+    n: 12,
+    category: 'Trends 2025/2026',
+    text: 'Welcher der folgenden Trends ist für das Content Marketing in 2025/2026 besonders relevant?',
+    options: [
+      'A. Die Rückkehr zu rein textbasiertem Content ohne visuelle Elemente',
+      'B. KI-generierter Content, Video-First-Strategie (Reels/Shorts) und UGC (User Generated Content)',
+      'C. Der vollständige Rückgang von Social Media zugunsten klassischer PR',
+      'D. Statische Webseiten ohne regelmäßige Content-Updates als SEO-Strategie'
+    ],
+    correct: [1],
+    explanation: 'Dominante Trends 2025/2026: KI-unterstützte Content-Erstellung, Video-First (Kurzvideos auf Instagram, TikTok, YouTube Shorts), authentischer User Generated Content (UGC) und Nachhaltigkeit als Differenzierungsmerkmal.',
+    ref: 'CMM2 Tag 1 · Aktuelle Trends im Content Marketing'
+  },
+  {
+    n: 13,
+    category: 'GreenBasket Praxisbezug',
+    text: 'GreenBasket analysiert seinen Content-Marketing-Ansatz. Welche der folgenden Maßnahmen wäre KEINE Content-Marketing-Maßnahme?',
+    options: [
+      'A. Ein Ratgeber-Blog „Wie erkenne ich frisches Gemüse?"',
+      'B. Eine Instagram-Story über einen Partnerbauern in der Lüneburger Heide',
+      'C. Eine bezahlte Google-Anzeige mit Rabattcoupon für Neukunden',
+      'D. Ein E-Mail-Newsletter mit saisonalen Rezepten für Bestandskunden'
+    ],
+    correct: [2],
+    explanation: 'Eine bezahlte Google-Anzeige mit Rabattcoupon ist klassische Werbung (Push-Prinzip) – kein Content Marketing. Blog, Bauern-Story und Rezept-Newsletter bieten echten Mehrwert und bauen Beziehungen auf.',
+    ref: 'CMM2 Tag 1 · Praxisprojekt GreenBasket GmbH'
+  },
+  {
+    n: 14,
+    category: 'KI-Ethik',
+    text: 'Welcher ethische Grundsatz ist beim Einsatz von KI im Content Marketing besonders wichtig?',
+    options: [
+      'A. KI-generierte Inhalte müssen nie geprüft werden, da KI keine sachlichen Fehler macht',
+      'B. KI-generierte Inhalte sind immer urheberrechtlich unbedenklich und können direkt veröffentlicht werden',
+      'C. Transparenz und Qualitätssicherung sind zentral: KI-Outputs müssen geprüft, überarbeitet und bei Bedarf als KI-unterstützt gekennzeichnet werden',
+      'D. KI darf nur für interne Dokumente genutzt werden, niemals für externe Kundenkommunikation'
+    ],
+    correct: [2],
+    explanation: 'KI kann halluzinieren, Fakten erfinden oder generische Texte erzeugen, die nicht zur Markenstimme passen. Jeder KI-Output braucht menschliche Qualitätssicherung. Urheberrechtsfragen bei KI-generierten Texten sind zudem noch nicht abschließend geklärt.',
+    ref: 'CMM2 Tag 1 · KI-Ethik · Verantwortungsvoll mit KI arbeiten'
+  },
+  {
+    n: 15,
+    category: 'Content Marketing als Strategie',
+    text: 'Welche Aussage über Content Marketing als strategisches Instrument ist korrekt?',
+    options: [
+      'A. Content Marketing ist eine einmalige Kampagne, die nach 3 Monaten abgeschlossen sein sollte',
+      'B. Content Marketing ist primär für B2C-Unternehmen geeignet und funktioniert im B2B-Bereich kaum',
+      'C. Content Marketing ist ein langfristiger Prozess, der kontinuierliche Investition in Inhalte erfordert und schrittweise Vertrauen und organische Sichtbarkeit aufbaut',
+      'D. Content Marketing ersetzt alle anderen Marketingmaßnahmen vollständig – andere Kanäle werden obsolet'
+    ],
+    correct: [2],
+    explanation: 'Content Marketing ist kein Sprint, sondern ein Marathon. Es braucht Konsistenz, Strategie und Zeit – dafür schafft es nachhaltigen Wert: Vertrauen, organische Sichtbarkeit und Kundenbindung, die klassische Werbung selten erreicht. B2B ist ein besonders starkes Einsatzfeld.',
+    ref: 'CMM2 Tag 1 · Content Marketing als langfristige Strategie'
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let shuffledQuestions = [];
+let wrongAnswers = [];
+let userName = '';
+let userEmail = '';
+let selectedOptions = new Set();
+let answered = false;
+let timerInterval = null;
+let timeLeft = 15 * 60;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function validateAndStart() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errEl = document.getElementById('form-error');
+  if (!name || !emailRegex.test(email)) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  userName = name;
+  userEmail = email;
+  startQuiz();
+}
+
+function startTimer() {
+  const el = document.getElementById('exam-timer');
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    if (el) {
+      el.textContent = '⏱ ' + m + ':' + String(s).padStart(2, '0');
+      if (timeLeft <= 120) el.style.color = '#FF6B6B';
+      else if (timeLeft <= 300) el.style.color = '#FFA500';
+      else el.style.color = '#4CAF85';
+    }
+    if (timeLeft <= 0) { clearInterval(timerInterval); showResult(); }
+  }, 1000);
+}
+
+function startQuiz() {
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  score = 0;
+  currentQuestion = 0;
+  startTimer();
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  renderQuestion();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = shuffledQuestions[currentQuestion];
+  const total = shuffledQuestions.length;
+  selectedOptions = new Set();
+  answered = false;
+
+  document.getElementById('progress-label').textContent = `Frage ${currentQuestion + 1} von ${total}`;
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / total) * 100}%`;
+
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  const optionsHTML = q.options.map((opt, idx) => `
+    <div class="option" data-index="${idx}" onclick="toggleOption(${idx})">
+      <div class="option-marker">${letters[idx]}</div>
+      <span>${opt}</span>
+    </div>
+  `).join('');
+
+  const container = document.getElementById('quiz-screen');
+  container.innerHTML = `
+    <div class="question-card" id="qcard">
+      <div class="question-header">
+        <div class="q-number">${currentQuestion + 1}</div>
+        <div class="q-meta">
+          <div class="q-category">${q.category}</div>
+          <div class="q-text">${q.text}</div>
+        </div>
+      </div>
+      <div class="options" id="options-container">${optionsHTML}</div>
+      <div class="feedback" id="feedback-box"></div>
+      <div class="card-actions">
+        <button class="btn btn-check" id="check-btn" onclick="checkAnswer()" disabled>Antwort prüfen</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">
+          ${currentQuestion < total - 1 ? 'Nächste Frage →' : 'Ergebnis anzeigen 🏁'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleOption(idx) {
+  if (answered) return;
+  document.querySelectorAll('.option').forEach(o => {
+    o.classList.remove('selected');
+    o.querySelector('.option-marker').textContent = ['A', 'B', 'C', 'D', 'E'][parseInt(o.dataset.index)];
+  });
+  selectedOptions.clear();
+  selectedOptions.add(idx);
+  const opt = document.querySelector(`.option[data-index="${idx}"]`);
+  opt.classList.add('selected');
+  opt.querySelector('.option-marker').textContent = '✓';
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (selectedOptions.size === 0 || answered) return;
+  answered = true;
+  const q = shuffledQuestions[currentQuestion];
+  const correctSet = new Set(q.correct);
+  const selectedArr = Array.from(selectedOptions);
+  const isCorrect = selectedArr.length === q.correct.length && selectedArr.every(i => correctSet.has(i));
+  if (isCorrect) score++;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const idx = parseInt(opt.dataset.index);
+    opt.classList.add('disabled');
+    const marker = opt.querySelector('.option-marker');
+    if (correctSet.has(idx)) {
+      opt.classList.add('correct');
+      marker.textContent = '✓';
+    } else if (selectedOptions.has(idx) && !correctSet.has(idx)) {
+      opt.classList.add('wrong');
+      marker.textContent = '✗';
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  const correctLabels = q.correct.map(i => `<strong>${q.options[i]}</strong>`).join(', ');
+  fb.innerHTML = `
+    <div class="feedback-title ${isCorrect ? 'correct-title' : 'wrong-title'}">
+      ${isCorrect ? '✅ Richtig!' : '❌ Leider falsch'}
+    </div>
+    ${!isCorrect ? `<div style="margin-bottom:8px;font-size:12px;color:var(--success);">✅ Richtige Antwort: ${correctLabels}</div>` : ''}
+    <div>${q.explanation}</div>
+    <div class="cmm-ref"><strong>📖 CMM2 Referenz:</strong> ${q.ref}</div>
+  `;
+
+  document.getElementById('qcard').classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById('live-score').textContent = `Punkte: ${score}`;
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').classList.add('show');
+
+  if (!isCorrect) {
+    wrongAnswers.push({
+      frage: q.text.substring(0, 100) + (q.text.length > 100 ? '...' : ''),
+      kategorie: q.category,
+      richtigeAntwort: q.correct.map(i => q.options[i]).join(' / '),
+      erklaerung: q.explanation
+    });
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < shuffledQuestions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+// ─── RESULT ──────────────────────────────────────────────────────────────────
+function showResult() {
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('progress-bar-container').style.display = 'none';
+
+  const total = shuffledQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  const wrong = total - score;
+
+  const wrongDetails = wrongAnswers.length === 0
+    ? '<p style="color:#10B981;font-weight:700;">🎉 Perfekt! Alle Fragen richtig beantwortet!</p>'
+    : wrongAnswers.map((w, i) => `
+        <div class="wrong-item">
+          <div class="wrong-item-cat">${i + 1}. ${w.kategorie}</div>
+          <div class="wrong-item-q">❓ ${w.frage}</div>
+          <div class="wrong-item-ans">✅ Richtige Antwort: ${w.richtigeAntwort}</div>
+          <div class="wrong-item-exp">💡 ${w.erklaerung}</div>
+        </div>
+      `).join('');
+
+  const wrongCategories = wrongAnswers.map(w => w.kategorie).join(' | ');
+  const now = new Date();
+  const timestamp = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
+
+  sendToWebhook({
+    name: userName,
+    email: userEmail,
+    quiz: 'CMM2-Tag1-Wissensquiz',
+    score: score,
+    total: total,
+    percent: percent + '%',
+    timestamp: timestamp,
+    wrong_categories: wrongCategories || 'Keine',
+    wrong_details: wrongDetails
+  });
+
+  let emoji, title, sub, color;
+  if (percent >= 87)      { emoji='🏆'; title='Ausgezeichnet!'; sub='Du hast die Grundlagen von Tag 1 sehr gut verstanden. Gut vorbereitet für Tag 2!'; color='#10B981'; }
+  else if (percent >= 67) { emoji='👍'; title='Gut gemacht!'; sub='Solide Basis – gehe nochmal die falsch beantworteten Themen durch. Besonders: Definition, Push/Pull und KI-Grundlagen.'; color='#1D6A4E'; }
+  else if (percent >= 47) { emoji='📚'; title='Weiter üben!'; sub='Gute Anstrengung – die Kernthemen von Tag 1 nochmal in Ruhe durcharbeiten. Dann starte das Quiz neu!'; color='#F59E0B'; }
+  else                    { emoji='💪'; title='Nicht aufgeben!'; sub='Lies die Erklärungen zu den falschen Fragen sorgfältig durch und starte das Quiz danach nochmal.'; color='#EF4444'; }
+
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `
+    <div style="font-size:52px;margin-bottom:16px;">${emoji}</div>
+    <div class="result-circle" style="background:linear-gradient(135deg,${color},#F59E0B)">
+      <div class="result-percent">${percent}%</div>
+      <div class="result-label">${score}/${total}</div>
+    </div>
+    <h2 class="result-title">${title}</h2>
+    <p class="result-sub">${sub}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">📧 Auswertung wurde an <strong style="color:var(--primary-light)">${userEmail}</strong> gesendet und im Kurs-Sheet erfasst.</p>
+    <div class="result-breakdown">
+      <div class="breakdown-card"><div class="breakdown-num green">${score}</div><div class="breakdown-label">✅ Richtig</div></div>
+      <div class="breakdown-card"><div class="breakdown-num red">${wrong}</div><div class="breakdown-label">❌ Falsch</div></div>
+      <div class="breakdown-card"><div class="breakdown-num blue">${percent}%</div><div class="breakdown-label">📊 Score</div></div>
+    </div>
+    <div class="wrong-list">${wrongDetails}</div>
+    <br>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Quiz wiederholen</button>
+    <br><br>
+    <div class="hint-box">
+      <strong>💡 Prüfungs-Tipp:</strong> Achte bei Prüfungsfragen auf Schlüsselwörter wie <em>„kein Merkmal"</em>, <em>„primär"</em>, <em>„ausschließlich"</em> oder <em>„KEINE Maßnahme"</em> – diese negativ formulierten Fragen kommen häufig in der Webmasters Europe Zertifizierung vor.
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  timeLeft = 15 * 60;
+  currentQuestion = 0;
+  score = 0;
+  selectedOptions = new Set();
+  answered = false;
+  shuffledQuestions = shuffle(questions);
+  wrongAnswers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar-container').style.display = 'block';
+  startTimer();
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sendToWebhook(data) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.warn('Webhook nicht erreichbar:', e);
+  }
+}
+</script>
+</body>
+</html>
